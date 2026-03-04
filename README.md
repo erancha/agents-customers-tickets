@@ -1,6 +1,6 @@
 # Customer Support Hub
 
-Spring Boot 3.x (Java 21) backend service implemented as a modular monolith.
+Spring Boot 3.x (Java 21) backend service implemented as a package-by-feature monolith (clear internal modules, single deployable).
 
 ## Prerequisites
 
