@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: customer-support-hub
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/supporthub_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:supporthub}
+    password: ${DB_PASSWORD:supporthub123}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:customer-support-hub}
+    secret: ${JWT_SECRET:change-me-in-prod-change-me-in-prod-change-me}
+    accessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:60}
