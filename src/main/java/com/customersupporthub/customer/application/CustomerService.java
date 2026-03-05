@@ -13,7 +13,7 @@ public class CustomerService {
 
   private final UserRepository userRepository;
 
-  public CustomerService(UserRepository userRepository) {
+  CustomerService(UserRepository userRepository) {
     this.userRepository = userRepository;
   }
 

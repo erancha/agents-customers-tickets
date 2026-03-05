@@ -21,30 +21,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/me")
 @Validated
-public class MeController {
+class MeController {
 
   private final CurrentUserProvider currentUserProvider;
   private final IdentityService identityService;
 
-  public MeController(CurrentUserProvider currentUserProvider, IdentityService identityService) {
+  MeController(CurrentUserProvider currentUserProvider, IdentityService identityService) {
     this.currentUserProvider = currentUserProvider;
     this.identityService = identityService;
   }
 
-  public record MeResponse(Long id, String username, Role role, String fullName, String email) {
-    public static MeResponse from(UserEntity u) {
+  record MeResponse(Long id, String username, Role role, String fullName, String email) {
+    static MeResponse from(UserEntity u) {
       return new MeResponse(u.getId(), u.getUsername(), u.getRole(), u.getFullName(), u.getEmail());
     }
   }
 
-  public record UpdateMeRequest(
+  record UpdateMeRequest(
       @NotBlank @Size(max = 200) String fullName,
       @NotBlank @Email @Size(max = 200) String email
   ) {
   }
 
   @GetMapping
-  public ResponseEntity<MeResponse> me() {
+  ResponseEntity<MeResponse> me() {
     CurrentUser cu = currentUserProvider.get();
     UserEntity u = identityService.requireUser(cu.id());
     return ResponseEntity.ok(MeResponse.from(u));
@@ -52,7 +52,7 @@ public class MeController {
 
   @PutMapping
   @PreAuthorize("hasAnyRole('AGENT','CUSTOMER','ADMIN')")
-  public ResponseEntity<MeResponse> updateMe(@Valid @RequestBody UpdateMeRequest req) {
+  ResponseEntity<MeResponse> updateMe(@Valid @RequestBody UpdateMeRequest req) {
     CurrentUser cu = currentUserProvider.get();
     UserEntity u = identityService.updateProfile(cu.id(), req.fullName(), req.email());
     return ResponseEntity.ok(MeResponse.from(u));

@@ -22,24 +22,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/customer/tickets")
 @Validated
-public class CustomerTicketsController {
+class CustomerTicketsController {
 
   private final CurrentUserProvider currentUserProvider;
   private final TicketService ticketService;
 
-  public CustomerTicketsController(CurrentUserProvider currentUserProvider, TicketService ticketService) {
+  CustomerTicketsController(CurrentUserProvider currentUserProvider, TicketService ticketService) {
     this.currentUserProvider = currentUserProvider;
     this.ticketService = ticketService;
   }
 
-  public record CreateTicketRequest(
+  record CreateTicketRequest(
       @NotBlank @Size(max = 200) String title,
       @NotBlank @Size(max = 4000) String description) {
   }
 
-  public record TicketResponse(Long id, Long customerId, Long agentId, String title, String description, String status,
+  record TicketResponse(Long id, Long customerId, Long agentId, String title, String description, String status,
       Instant createdAt) {
-    public static TicketResponse from(TicketEntity t) {
+    static TicketResponse from(TicketEntity t) {
       return new TicketResponse(t.getId(), t.getCustomerId(), t.getAgentId(), t.getTitle(), t.getDescription(),
           t.getStatus(), t.getCreatedAt());
     }
@@ -47,7 +47,7 @@ public class CustomerTicketsController {
 
   @PostMapping
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseEntity<TicketResponse> create(@Valid @RequestBody CreateTicketRequest req) {
+  ResponseEntity<TicketResponse> create(@Valid @RequestBody CreateTicketRequest req) {
     CurrentUser cu = currentUserProvider.get();
     TicketEntity t = ticketService.createTicket(cu.id(), req.title(), req.description());
     return ResponseEntity.status(HttpStatus.CREATED).body(TicketResponse.from(t));
@@ -55,7 +55,7 @@ public class CustomerTicketsController {
 
   @GetMapping
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseEntity<List<TicketResponse>> myTickets() {
+  ResponseEntity<List<TicketResponse>> myTickets() {
     CurrentUser cu = currentUserProvider.get();
     List<TicketEntity> tickets = ticketService.listTicketsForCustomer(cu.id());
     return ResponseEntity.ok(tickets.stream().map(TicketResponse::from).toList());

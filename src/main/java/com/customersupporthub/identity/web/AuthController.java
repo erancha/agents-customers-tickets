@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @Validated
-public class AuthController {
+class AuthController {
 
   private final IdentityService identityService;
   private final JwtService jwtService;
@@ -26,18 +26,18 @@ public class AuthController {
   @Value("${security.jwt.accessTokenMinutes:60}")
   private long accessTokenMinutes;
 
-  public AuthController(IdentityService identityService, JwtService jwtService) {
+  AuthController(IdentityService identityService, JwtService jwtService) {
     this.identityService = identityService;
     this.jwtService = jwtService;
   }
 
-  public record TokenRequest(
+  record TokenRequest(
       @NotBlank @Size(max = 100) String username,
       @NotBlank @Size(max = 200) String password
   ) {
   }
 
-  public record TokenResponse(
+  record TokenResponse(
       String access_token,
       String token_type,
       long expires_in,
@@ -46,7 +46,7 @@ public class AuthController {
   }
 
   @PostMapping("/token")
-  public ResponseEntity<TokenResponse> token(@Valid @RequestBody TokenRequest req) {
+  ResponseEntity<TokenResponse> token(@Valid @RequestBody TokenRequest req) {
     UserEntity u = identityService.authenticate(req.username(), req.password());
     String token = jwtService.issueAccessToken(u.getId(), u.getUsername(), u.getRole());
     return ResponseEntity.ok(new TokenResponse(token, "Bearer", accessTokenMinutes * 60, Instant.now()));

@@ -22,39 +22,39 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin")
 @Validated
-public class AdminUsersController {
+class AdminUsersController {
 
   private final IdentityService identityService;
   private final UserRepository userRepository;
 
-  public AdminUsersController(IdentityService identityService, UserRepository userRepository) {
+  AdminUsersController(IdentityService identityService, UserRepository userRepository) {
     this.identityService = identityService;
     this.userRepository = userRepository;
   }
 
-  public record CreateAgentRequest(
+  record CreateAgentRequest(
       @NotBlank @Size(max = 100) String username,
       @NotBlank @Size(min = 6, max = 200) String password,
       @NotBlank @Size(max = 200) String fullName,
       @NotBlank @Email @Size(max = 200) String email) {
   }
 
-  public record UserResponse(Long id, String username, Role role, String fullName, String email) {
-    public static UserResponse from(UserEntity u) {
+  record UserResponse(Long id, String username, Role role, String fullName, String email) {
+    static UserResponse from(UserEntity u) {
       return new UserResponse(u.getId(), u.getUsername(), u.getRole(), u.getFullName(), u.getEmail());
     }
   }
 
   @GetMapping("/agents")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<List<UserResponse>> listAgents() {
+  ResponseEntity<List<UserResponse>> listAgents() {
     List<UserEntity> agents = userRepository.findAllByRole(Role.AGENT);
     return ResponseEntity.ok(agents.stream().map(UserResponse::from).toList());
   }
 
   @PostMapping("/agents")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<UserResponse> createAgent(@Valid @RequestBody CreateAgentRequest req) {
+  ResponseEntity<UserResponse> createAgent(@Valid @RequestBody CreateAgentRequest req) {
     UserEntity created = identityService.createUser(req.username(), req.password(), Role.AGENT, null, req.fullName(),
         req.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(created));

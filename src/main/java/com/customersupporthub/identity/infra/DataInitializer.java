@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DataInitializer {
+class DataInitializer {
 
   @Bean
-  public CommandLineRunner initDefaultAdmin(IdentityService identityService, UserRepository userRepository) {
+  CommandLineRunner initDefaultAdmin(IdentityService identityService, UserRepository userRepository) {
     return args -> {
       if (!userRepository.existsByUsername("admin")) {
         identityService.createUser(

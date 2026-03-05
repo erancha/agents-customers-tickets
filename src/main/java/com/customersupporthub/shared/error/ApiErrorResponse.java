@@ -2,7 +2,7 @@ package com.customersupporthub.shared.error;
 
 import java.time.Instant;
 
-public record ApiErrorResponse(
+record ApiErrorResponse(
     Instant timestamp,
     int status,
     String error,

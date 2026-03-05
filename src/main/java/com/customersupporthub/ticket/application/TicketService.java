@@ -17,7 +17,7 @@ public class TicketService {
   private final TicketRepository ticketRepository;
   private final UserRepository userRepository;
 
-  public TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
+  TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
     this.ticketRepository = ticketRepository;
     this.userRepository = userRepository;
   }

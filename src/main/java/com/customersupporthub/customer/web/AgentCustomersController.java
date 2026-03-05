@@ -26,14 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/agent/customers")
 @Validated
-public class AgentCustomersController {
+class AgentCustomersController {
 
   private final CurrentUserProvider currentUserProvider;
   private final IdentityService identityService;
   private final CustomerService customerService;
   private final UserRepository userRepository;
 
-  public AgentCustomersController(CurrentUserProvider currentUserProvider, IdentityService identityService,
+  AgentCustomersController(CurrentUserProvider currentUserProvider, IdentityService identityService,
       CustomerService customerService, UserRepository userRepository) {
     this.currentUserProvider = currentUserProvider;
     this.identityService = identityService;
@@ -41,7 +41,7 @@ public class AgentCustomersController {
     this.userRepository = userRepository;
   }
 
-  public record CreateCustomerRequest(
+  record CreateCustomerRequest(
       @NotBlank @Size(max = 100) String username,
       @NotBlank @Size(min = 6, max = 200) String password,
       @NotBlank @Size(max = 200) String fullName,
@@ -49,15 +49,15 @@ public class AgentCustomersController {
       Long agentId) {
   }
 
-  public record CustomerResponse(Long id, String username, String fullName, String email, Long agentId) {
-    public static CustomerResponse from(UserEntity u) {
+  record CustomerResponse(Long id, String username, String fullName, String email, Long agentId) {
+    static CustomerResponse from(UserEntity u) {
       return new CustomerResponse(u.getId(), u.getUsername(), u.getFullName(), u.getEmail(), u.getAgentId());
     }
   }
 
   @PostMapping
   @PreAuthorize("hasAnyRole('AGENT','ADMIN')")
-  public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CreateCustomerRequest req) {
+  ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CreateCustomerRequest req) {
     CurrentUser cu = currentUserProvider.get();
     Long agentId;
     if (cu.role() == Role.ADMIN) {
@@ -76,7 +76,7 @@ public class AgentCustomersController {
 
   @GetMapping
   @PreAuthorize("hasAnyRole('AGENT','ADMIN')")
-  public ResponseEntity<List<CustomerResponse>> listCustomers(
+  ResponseEntity<List<CustomerResponse>> listCustomers(
       @RequestParam(name = "agentId", required = false) Long agentId) {
     CurrentUser cu = currentUserProvider.get();
 

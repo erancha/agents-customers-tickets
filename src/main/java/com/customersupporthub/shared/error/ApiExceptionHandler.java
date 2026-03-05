@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class ApiExceptionHandler {
+class ApiExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
     StringBuilder sb = new StringBuilder("Validation failed");
     for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
       sb.append("; ").append(fe.getField()).append(": ").append(fe.getDefaultMessage());
@@ -35,52 +35,52 @@ public class ApiExceptionHandler {
   }
 
   @ExceptionHandler(AuthenticationException.class)
-  public ResponseEntity<ApiErrorResponse> handleAuth(AuthenticationException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleAuth(AuthenticationException ex, HttpServletRequest req) {
     return error(HttpStatus.UNAUTHORIZED, "Unauthorized", req);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<ApiErrorResponse> handleDenied(AccessDeniedException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleDenied(AccessDeniedException ex, HttpServletRequest req) {
     return error(HttpStatus.FORBIDDEN, "Forbidden", req);
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest req) {
     return error(HttpStatus.NOT_FOUND, ex.getMessage(), req);
   }
 
   @ExceptionHandler(ConflictException.class)
-  public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleConflict(ConflictException ex, HttpServletRequest req) {
     return error(HttpStatus.CONFLICT, ex.getMessage(), req);
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
-  public ResponseEntity<ApiErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
+  ResponseEntity<ApiErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
       HttpServletRequest req) {
     return error(HttpStatus.CONFLICT, "Conflict", req);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ApiErrorResponse> handleBadRequest(IllegalArgumentException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleBadRequest(IllegalArgumentException ex, HttpServletRequest req) {
     return error(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
   }
 
   // Database availability handlers - matched by specificity, not order
   // Spring matches on the most specific exception type in the inheritance hierarchy
   @ExceptionHandler({CannotCreateTransactionException.class, DataAccessResourceFailureException.class})
-  public ResponseEntity<ApiErrorResponse> handleDatabaseUnavailable(Exception ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleDatabaseUnavailable(Exception ex, HttpServletRequest req) {
     log.warn("Database unavailable: {}", ex.getClass().getSimpleName());
     return error(HttpStatus.SERVICE_UNAVAILABLE, "Database service temporarily unavailable. Please retry after a moment.", req);
   }
 
   @ExceptionHandler(TransientDataAccessException.class)
-  public ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex, HttpServletRequest req) {
     log.warn("Transient database error (may be temporary): {}", ex.getMessage());
     return error(HttpStatus.SERVICE_UNAVAILABLE, "Database service temporarily unavailable. Please retry after a moment.", req);
   }
 
   @ExceptionHandler(JpaSystemException.class)
-  public ResponseEntity<ApiErrorResponse> handleJpaSystemError(JpaSystemException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleJpaSystemError(JpaSystemException ex, HttpServletRequest req) {
     log.warn("JPA system error: {}", ex.getMessage());
     // Check if the root cause is a database connectivity issue
     if (isCausedByDatabaseUnavailability(ex)) {
@@ -112,7 +112,7 @@ public class ApiExceptionHandler {
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest req) {
     log.error("Unhandled exception", ex);
     String msg = ex.getMessage();
     if (msg == null || msg.isBlank()) {

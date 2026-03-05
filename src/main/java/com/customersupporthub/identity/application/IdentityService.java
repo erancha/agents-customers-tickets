@@ -14,7 +14,7 @@ public class IdentityService {
   private final UserRepository userRepository;
   private final PasswordHasher passwordHasher;
 
-  public IdentityService(UserRepository userRepository, PasswordHasher passwordHasher) {
+  IdentityService(UserRepository userRepository, PasswordHasher passwordHasher) {
     this.userRepository = userRepository;
     this.passwordHasher = passwordHasher;
   }
@@ -25,7 +25,7 @@ public class IdentityService {
   }
 
   @Transactional(readOnly = true)
-  public UserEntity requireByUsername(String username) {
+  UserEntity requireByUsername(String username) {
     return userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
 

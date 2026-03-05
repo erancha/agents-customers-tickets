@@ -18,19 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/agent/tickets")
 @Validated
-public class AgentTicketsController {
+class AgentTicketsController {
 
   private final CurrentUserProvider currentUserProvider;
   private final TicketService ticketService;
 
-  public AgentTicketsController(CurrentUserProvider currentUserProvider, TicketService ticketService) {
+  AgentTicketsController(CurrentUserProvider currentUserProvider, TicketService ticketService) {
     this.currentUserProvider = currentUserProvider;
     this.ticketService = ticketService;
   }
 
-  public record TicketResponse(Long id, Long customerId, Long agentId, String title, String description, String status,
+  record TicketResponse(Long id, Long customerId, Long agentId, String title, String description, String status,
       Instant createdAt) {
-    public static TicketResponse from(TicketEntity t) {
+    static TicketResponse from(TicketEntity t) {
       return new TicketResponse(t.getId(), t.getCustomerId(), t.getAgentId(), t.getTitle(), t.getDescription(),
           t.getStatus(), t.getCreatedAt());
     }
@@ -38,7 +38,7 @@ public class AgentTicketsController {
 
   @GetMapping
   @PreAuthorize("hasAnyRole('AGENT','ADMIN')")
-  public ResponseEntity<List<TicketResponse>> search(
+  ResponseEntity<List<TicketResponse>> search(
       @RequestParam(name = "agentId", required = false) Long agentId,
       @RequestParam(name = "customerId", required = false) Long customerId) {
     CurrentUser cu = currentUserProvider.get();

@@ -45,7 +45,7 @@ public class TicketEntity {
     return id;
   }
 
-  public void setId(Long id) {
+  void setId(Long id) {
     this.id = id;
   }
 

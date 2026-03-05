@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,13 +31,13 @@ import java.util.function.Function;
 @Configuration
 @EnableMethodSecurity
 @EnableConfigurationProperties(JwtProperties.class)
-public class SecurityConfig {
+class SecurityConfig {
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http,
+  SecurityFilterChain securityFilterChain(HttpSecurity http,
       Function<Jwt, JwtAuthenticationToken> jwtAuthConverter) throws Exception {
     http
-        .csrf(csrf -> csrf.disable())
+        .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.POST, "/api/auth/token").permitAll()
@@ -54,7 +55,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  public Function<Jwt, JwtAuthenticationToken> jwtAuthConverter() {
+  Function<Jwt, JwtAuthenticationToken> jwtAuthConverter() {
     return jwt -> {
       Long uid = jwt.getClaim("uid");
       String roleStr = jwt.getClaim("role");
@@ -72,13 +73,13 @@ public class SecurityConfig {
   }
 
   @Bean
-  public JwtDecoder jwtDecoder(JwtProperties props) {
+  JwtDecoder jwtDecoder(JwtProperties props) {
     SecretKey key = new SecretKeySpec(props.secret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     return NimbusJwtDecoder.withSecretKey(key).build();
   }
 
   @Bean
-  public JwtEncoder jwtEncoder(JwtProperties props) {
+  JwtEncoder jwtEncoder(JwtProperties props) {
     SecretKey key = new SecretKeySpec(props.secret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     return new NimbusJwtEncoder(new ImmutableSecret<>(key));
   }

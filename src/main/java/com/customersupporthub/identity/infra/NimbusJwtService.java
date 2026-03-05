@@ -18,7 +18,7 @@ class NimbusJwtService implements JwtService {
   private final JwtEncoder jwtEncoder;
   private final JwtProperties props;
 
-  public NimbusJwtService(JwtEncoder jwtEncoder, JwtProperties props) {
+  NimbusJwtService(JwtEncoder jwtEncoder, JwtProperties props) {
     this.jwtEncoder = jwtEncoder;
     this.props = props;
   }

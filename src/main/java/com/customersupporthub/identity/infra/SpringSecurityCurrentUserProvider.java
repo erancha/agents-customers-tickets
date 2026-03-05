@@ -13,7 +13,7 @@ class SpringSecurityCurrentUserProvider implements CurrentUserProvider {
 
   @Override
   public CurrentUser get() {
-    CurrentUser currentUser = null;
+    CurrentUser currentUser;
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || auth.getName() == null) {
