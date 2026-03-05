@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SpringSecurityCurrentUserProvider implements CurrentUserProvider {
+class SpringSecurityCurrentUserProvider implements CurrentUserProvider {
 
   @Override
   public CurrentUser get() {

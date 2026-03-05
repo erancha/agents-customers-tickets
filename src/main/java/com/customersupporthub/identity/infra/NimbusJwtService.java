@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NimbusJwtService implements JwtService {
+class NimbusJwtService implements JwtService {
 
   private final JwtEncoder jwtEncoder;
   private final JwtProperties props;

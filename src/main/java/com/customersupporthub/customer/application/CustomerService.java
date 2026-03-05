@@ -23,7 +23,7 @@ public class CustomerService {
   }
 
   @Transactional(readOnly = true)
-  public UserEntity requireCustomer(Long customerId) {
+  UserEntity requireCustomer(Long customerId) {
     UserEntity u = userRepository.findById(customerId)
         .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     if (u.getRole() != Role.CUSTOMER) {
