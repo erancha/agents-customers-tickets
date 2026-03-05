@@ -73,10 +73,18 @@ uuid() {
 json_get_raw() {
   local url="$1"
   local token="$2"
-  curl -sS -f "$url" -H "Authorization: Bearer $token" || {
-    red "HTTP GET failed: $url"
+  local http_code
+  local response
+  response=$(curl -sS -w "\n%{http_code}" "$url" -H "Authorization: Bearer $token")
+  http_code=$(echo "$response" | tail -n1)
+  response=$(echo "$response" | head -n-1)
+  
+  if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
+    red "HTTP GET failed: $url (status: $http_code)"
+    echo "$response" >&2
     return 1
-  }
+  fi
+  echo "$response"
 }
 
 json_get() {
@@ -89,10 +97,18 @@ json_post_raw() {
   local url="$1"
   local token="$2"
   local body="$3"
-  curl -sS -f -X POST "$url" -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "$body" || {
-    red "HTTP POST failed: $url"
+  local http_code
+  local response
+  response=$(curl -sS -w "\n%{http_code}" -X POST "$url" -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "$body")
+  http_code=$(echo "$response" | tail -n1)
+  response=$(echo "$response" | head -n-1)
+  
+  if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
+    red "HTTP POST failed: $url (status: $http_code)"
+    echo "$response" >&2
     return 1
-  }
+  fi
+  echo "$response"
 }
 
 json_post() {
@@ -127,10 +143,18 @@ EOF
 get_token() {
   local username="$1"
   local password="$2"
+  local http_code
   local body
-  body=$(curl -sS -f -X POST "$BASE_URL/api/auth/token" -H "Content-Type: application/json" -d "{\"username\":\"$username\",\"password\":\"$password\"}" 2>/dev/null) || {
-    fail "Failed to call $BASE_URL/api/auth/token. Make sure the service is running (build+run or deploy) before running smoke-test.sh"
-  }
+  body=$(curl -sS -w "\n%{http_code}" -X POST "$BASE_URL/api/auth/token" -H "Content-Type: application/json" -d "{\"username\":\"$username\",\"password\":\"$password\"}" 2>/dev/null)
+  http_code=$(echo "$body" | tail -n1)
+  body=$(echo "$body" | head -n-1)
+  
+  if [[ "$http_code" != "200" ]]; then
+    red "Failed to authenticate (HTTP $http_code)"
+    red "Response:"
+    echo "$body" | pretty_json >&2
+    fail "Make sure the service and database are running: docker compose up -d && ./deploy.sh"
+  fi
 
   # Extract access_token without jq
   local token
