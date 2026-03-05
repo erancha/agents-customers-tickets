@@ -112,18 +112,19 @@ Scripts are available at repo root and are intended to be run from WSL.
   - Config: [`src/main/resources/application.yml`](src/main/resources/application.yml)
   - JPA entities: [`src/main/java/com/customersupporthub/identity/infra/UserEntity.java`](src/main/java/com/customersupporthub/identity/infra/UserEntity.java), [`src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java`](src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java)
 
-### Roles & permissions
+### Role-Based Access Control (RBAC)
 
-- **Support 3 roles: ADMIN / AGENT / CUSTOMER**
-  - Role enum: [`src/main/java/com/customersupporthub/identity/domain/Role.java`](src/main/java/com/customersupporthub/identity/domain/Role.java)
-  - JWT role claim to authority mapping:
-    - [`src/main/java/com/customersupporthub/identity/infra/SecurityConfig.java`](src/main/java/com/customersupporthub/identity/infra/SecurityConfig.java)
+Roles (`ADMIN`, `AGENT`, `CUSTOMER`) are enforced through:
 
-- **ADMIN can do anything**
-  - Enforced via method-level security / role checks in controllers (examples):
-    - [`src/main/java/com/customersupporthub/identity/web/AdminUsersController.java`](src/main/java/com/customersupporthub/identity/web/AdminUsersController.java)
-    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java)
-    - [`src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java)
+- **Method-Level Security**: Using `@PreAuthorize` annotations on controller methods.
+- **Role Checks in Business Logic**: Explicit checks in service methods for fine-grained control.
+- **JWT Claims**: Roles are embedded in JWT tokens and mapped to Spring Security authorities.
+
+This layered security ensures that users can only access resources appropriate to their role.
+
+- Role enum: [`src/main/java/com/customersupporthub/identity/domain/Role.java`](src/main/java/com/customersupporthub/identity/domain/Role.java)
+- JWT role claim to authority mapping: [`src/main/java/com/customersupporthub/identity/infra/SecurityConfig.java`](src/main/java/com/customersupporthub/identity/infra/SecurityConfig.java)
+- Examples of method-level security: [`src/main/java/com/customersupporthub/identity/web/AdminUsersController.java`](src/main/java/com/customersupporthub/identity/web/AdminUsersController.java), [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java), [`src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java)
 
 ### Customer management
 

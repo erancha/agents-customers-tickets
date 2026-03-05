@@ -9,9 +9,66 @@ fail() {
   exit 1
 }
 
-MVN_ARGS=("-DskipTests=false" "test")
-if [[ "${SKIP_TESTS:-}" == "1" ]]; then
-  MVN_ARGS=("-DskipTests" "package")
+show_help() {
+  cat >&2 <<EOF
+Usage: ./build.sh [OPTIONS]
+
+Options:
+  --clean             Run 'mvn clean' phase
+  --skip-tests        Skip running tests
+  --help              Show this help message
+
+Examples:
+  ./build.sh                      # No clean + run tests (default)
+  ./build.sh --clean              # Clean + run tests
+  ./build.sh --skip-tests         # No clean + skip tests
+  ./build.sh --clean --skip-tests # Clean + skip tests
+
+Environment variables (deprecated, use flags instead):
+  SKIP_TESTS=1                    # Same as --skip-tests
+EOF
+}
+
+SKIP_TESTS="${SKIP_TESTS:-}"
+SKIP_CLEAN=1
+
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --clean)
+      SKIP_CLEAN=0
+      shift
+      ;;
+    --skip-tests)
+      SKIP_TESTS=1
+      shift
+      ;;
+    --help)
+      show_help
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      show_help
+      exit 1
+      ;;
+  esac
+done
+
+# Build Maven arguments
+MVN_ARGS=()
+
+# Add clean phase only if --clean
+if [[ "$SKIP_CLEAN" == "0" ]]; then
+  MVN_ARGS+=("clean")
+fi
+
+# Always build the package (includes compile and test phases)
+MVN_ARGS+=("package")
+
+# Skip tests if requested
+if [[ "$SKIP_TESTS" == "1" ]]; then
+  MVN_ARGS+=("-DskipTests")
 fi
 
 if [[ -x "./mvnw" ]]; then

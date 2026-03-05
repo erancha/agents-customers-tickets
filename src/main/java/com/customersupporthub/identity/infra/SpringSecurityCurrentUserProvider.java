@@ -13,22 +13,24 @@ public class SpringSecurityCurrentUserProvider implements CurrentUserProvider {
 
   @Override
   public CurrentUser get() {
+    CurrentUser currentUser = null;
+
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || auth.getName() == null) {
       throw new IllegalStateException("No authenticated user");
     }
     Object principal = auth.getPrincipal();
     if (principal instanceof JwtPrincipal jp) {
-      return new CurrentUser(jp.userId(), jp.username(), jp.role());
-    }
-    if (principal instanceof Jwt jwt) {
+      currentUser = new CurrentUser(jp.userId(), jp.username(), jp.role());
+    } else if (principal instanceof Jwt jwt) {
       Long uid = jwt.getClaim("uid");
       String roleStr = jwt.getClaim("role");
       if (uid == null || roleStr == null) {
         throw new IllegalStateException("JWT missing required claims");
       }
-      return new CurrentUser(uid, jwt.getSubject(), Role.valueOf(roleStr));
-    }
-    throw new IllegalStateException("Unsupported principal type");
+      currentUser = new CurrentUser(uid, jwt.getSubject(), Role.valueOf(roleStr));
+    } else throw new IllegalStateException("Unsupported principal type");
+
+    return currentUser;
   }
 }

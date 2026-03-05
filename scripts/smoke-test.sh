@@ -196,13 +196,13 @@ main() {
   agent_id=$(create_agent "$admin_token" "$agent_username" "$agent_email")
   echo "Agent id: $agent_id"
 
-  step "Listing agents (admin)..."
-  json_get "$BASE_URL/api/admin/agents" "$admin_token"
-  echo
-
   step "Getting agent JWT..."
   local agent_token
   agent_token=$(get_token "$agent_username" "$DEMO_AGENT_PASSWORD")
+
+  step "Listing agents (admin)..."
+  json_get "$BASE_URL/api/admin/agents" "$admin_token"
+  echo
 
   step "Creating ${customer_count} fresh customers for this run..."
   for i in $(seq 1 "$customer_count"); do
