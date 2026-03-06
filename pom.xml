@@ -11,9 +11,9 @@
   </parent>
 
   <groupId>com.agentscustomerstickets</groupId>
-  <artifactId>agents-customes-tickets</artifactId>
+  <artifactId>agents-customers-tickets</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>agents-customes-tickets</name>
+  <name>agents-customers-tickets</name>
   <description>Agents Customers Tickets</description>
 
   <properties>

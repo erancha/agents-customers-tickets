@@ -129,7 +129,7 @@ Build and run it first, then retry:
 
   docker compose up -d
   ./build.sh
-  java -jar target/agents-customes-tickets-0.0.1-SNAPSHOT.jar
+  java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
 
 Or deploy with Docker:
 

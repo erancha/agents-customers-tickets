@@ -10,7 +10,10 @@ Spring Boot 3.x (Java 21) backend service implemented as a package-by-feature mo
 ## Build & Run
 
 ```bash
-# Start MySQL (optional; required if you use the default DB_URL)
+# Start only MySQL (recommended when running Spring Boot from IDE/CLI)
+docker compose up -d mysql
+
+# Optional: start full stack (MySQL + app service defined in compose)
 docker compose up -d
 
 # Build the application
@@ -20,7 +23,7 @@ docker compose up -d
 mvn test
 
 # Run the service
-java -jar target/agents-customes-tickets-0.0.1-SNAPSHOT.jar
+java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
 ```
 
 In another terminal, you can run the end-to-end smoke test:

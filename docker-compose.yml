@@ -6,10 +6,32 @@ services:
       MYSQL_USER: agentscustomerstickets
       MYSQL_PASSWORD: agentscustomerstickets123
       MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agents-customers-tickets:local
+    container_name: agents-customers-tickets
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      DB_USERNAME: agentscustomerstickets
+      DB_PASSWORD: agentscustomerstickets123
+    ports:
+      - "${APP_PORT:-8080}:8080"
 
 volumes:
   mysql_data:

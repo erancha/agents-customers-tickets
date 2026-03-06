@@ -2,11 +2,10 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-APP_NAME="agents-customes-tickets"
-IMAGE_NAME="${APP_NAME}:local"
-CONTAINER_NAME="$APP_NAME"
+APP_NAME="agents-customers-tickets"
 
 fail() {
   echo "ERROR: $1" >&2
@@ -49,23 +48,31 @@ EOF
 
 require_docker
 
+compose() {
+  if docker compose version >/dev/null 2>&1; then
+    docker compose "$@"
+    return
+  fi
+
+  if command -v docker-compose >/dev/null 2>&1; then
+    docker-compose "$@"
+    return
+  fi
+
+  fail "Docker Compose not found. Install Docker Compose (or Docker Desktop) and retry."
+}
+
 if [[ ! -f "Dockerfile" ]]; then
   fail "Dockerfile not found in $ROOT_DIR"
 fi
 
-./scripts/build.sh
-
-docker build -t "$IMAGE_NAME" .
-
-if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
-  docker rm -f "$CONTAINER_NAME" >/dev/null
+if [[ ! -f "docker-compose.yml" ]]; then
+  fail "docker-compose.yml not found in $ROOT_DIR"
 fi
 
+"$SCRIPT_DIR/build.sh"
+
 APP_PORT="${APP_PORT:-8080}"
+APP_PORT="$APP_PORT" compose up -d --build mysql app
 
-docker run -d \
-  --name "$CONTAINER_NAME" \
-  -p "${APP_PORT}:8080" \
-  "$IMAGE_NAME"
-
-echo "Deployed: container=$CONTAINER_NAME image=$IMAGE_NAME port=${APP_PORT}->8080"
+echo "Deployed via compose: service=$APP_NAME port=${APP_PORT}->8080"

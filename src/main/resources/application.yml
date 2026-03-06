@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: agents-customes-tickets
+    name: agents-customers-tickets
 
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
@@ -19,6 +19,6 @@ spring:
 
 security:
   jwt:
-    issuer: ${JWT_ISSUER:agents-customes-tickets}
+    issuer: ${JWT_ISSUER:agents-customers-tickets}
     secret: ${JWT_SECRET:change-me-in-prod-change-me-in-prod-change-me}
     accessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:60}
