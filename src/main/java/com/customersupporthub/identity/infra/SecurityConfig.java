@@ -58,6 +58,9 @@ class SecurityConfig {
   Function<Jwt, JwtAuthenticationToken> jwtAuthConverter() {
     return jwt -> {
       Long uid = jwt.getClaim("uid");
+      if (uid == null) {
+        throw new IllegalArgumentException("JWT claim 'uid' is required");
+      }
       String roleStr = jwt.getClaim("role");
       Role role = Role.valueOf(roleStr);
 

@@ -1,4 +1,4 @@
-package com.customersupporthub.ticket.infra;
+package com.customersupporthub.tickets.infra;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

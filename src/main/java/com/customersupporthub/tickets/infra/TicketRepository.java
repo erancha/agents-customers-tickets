@@ -1,4 +1,4 @@
-package com.customersupporthub.ticket.infra;
+package com.customersupporthub.tickets.infra;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

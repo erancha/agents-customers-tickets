@@ -170,7 +170,7 @@ create_agent() {
 
   echo "Creating agent '$username'..." >&2
   local body
-  body=$(json_post_raw "$BASE_URL/api/admin/agents" "$admin_token" "{\"username\":\"$username\",\"password\":\"$DEMO_AGENT_PASSWORD\",\"fullName\":\"$DEMO_AGENT_FULL_NAME\",\"email\":\"$email\"}")
+  body=$(json_post_raw "$BASE_URL/api/agents" "$admin_token" "{\"username\":\"$username\",\"password\":\"$DEMO_AGENT_PASSWORD\",\"fullName\":\"$DEMO_AGENT_FULL_NAME\",\"email\":\"$email\"}")
   echo "$body" >&2
   local id
   id=$(echo "$body" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p')
@@ -185,7 +185,7 @@ create_customer_for_agent() {
 
   echo "Creating customer '$username' under agent..." >&2
   local body
-  body=$(json_post_raw "$BASE_URL/api/agent/customers" "$agent_token" "{\"username\":\"$username\",\"password\":\"$DEMO_CUSTOMER_PASSWORD\",\"fullName\":\"$DEMO_CUSTOMER_FULL_NAME\",\"email\":\"$email\"}")
+  body=$(json_post_raw "$BASE_URL/api/customers" "$agent_token" "{\"username\":\"$username\",\"password\":\"$DEMO_CUSTOMER_PASSWORD\",\"fullName\":\"$DEMO_CUSTOMER_FULL_NAME\",\"email\":\"$email\"}")
   echo "$body" >&2
   local id
   id=$(echo "$body" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p')
@@ -225,7 +225,7 @@ main() {
   agent_token=$(get_token "$agent_username" "$DEMO_AGENT_PASSWORD")
 
   step "Listing agents (admin)..."
-  json_get "$BASE_URL/api/admin/agents" "$admin_token"
+  json_get "$BASE_URL/api/agents" "$admin_token"
   echo
 
   step "Creating ${customer_count} fresh customers for this run..."
@@ -239,7 +239,7 @@ main() {
   done
 
   step "Listing customers of the agent..."
-  json_get "$BASE_URL/api/agent/customers" "$agent_token"
+  json_get "$BASE_URL/api/customers" "$agent_token"
   echo
 
   for i in $(seq 1 "$customer_count"); do
@@ -251,26 +251,26 @@ main() {
     step "Creating $tickets_per_customer tickets for customer #${i}..."
     for t in $(seq 1 "$tickets_per_customer"); do
       local ticket_resp
-      ticket_resp=$(json_post "$BASE_URL/api/customer/tickets" "$ctoken" "{\"title\":\"Test ticket c${i} #${t} $(date +%s)\",\"description\":\"Created by smoke-test.sh\"}")
+      ticket_resp=$(json_post "$BASE_URL/api/tickets" "$ctoken" "{\"title\":\"Test ticket c${i} #${t} $(date +%s)\",\"description\":\"Created by smoke-test.sh\"}")
       echo "$ticket_resp"
     done
 
     step "Listing tickets for customer #${i}..."
-    json_get "$BASE_URL/api/customer/tickets" "$ctoken"
+    json_get "$BASE_URL/api/tickets" "$ctoken"
     echo
   done
 
   step "Listing tickets for the agent (all customers)..."
-  json_get "$BASE_URL/api/agent/tickets" "$agent_token"
+  json_get "$BASE_URL/api/tickets" "$agent_token"
   echo
 
   for i in $(seq 1 "$customer_count"); do
     step "Listing tickets for the agent (filtered by customer #${i}) :"
-    json_get "$BASE_URL/api/agent/tickets?customerId=${customers_ids[$((i-1))]}" "$agent_token"
+    json_get "$BASE_URL/api/tickets?customerId=${customers_ids[$((i-1))]}" "$agent_token"
     echo
 
     step ".. and as admin :"
-    json_get "$BASE_URL/api/agent/tickets?agentId=$agent_id&customerId=${customers_ids[$((i-1))]}" "$admin_token"
+    json_get "$BASE_URL/api/tickets?agentId=$agent_id&customerId=${customers_ids[$((i-1))]}" "$admin_token"
     echo
   done
 

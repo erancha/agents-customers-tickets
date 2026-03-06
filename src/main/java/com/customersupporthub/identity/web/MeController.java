@@ -39,8 +39,7 @@ class MeController {
 
   record UpdateMeRequest(
       @NotBlank @Size(max = 200) String fullName,
-      @NotBlank @Email @Size(max = 200) String email
-  ) {
+      @NotBlank @Email @Size(max = 200) String email) {
   }
 
   @GetMapping

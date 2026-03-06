@@ -1,29 +1,31 @@
-package com.customersupporthub.ticket.application;
+package com.customersupporthub.tickets.application;
 
 import com.customersupporthub.identity.domain.Role;
 import com.customersupporthub.identity.infra.UserEntity;
 import com.customersupporthub.identity.infra.UserRepository;
 import com.customersupporthub.shared.error.ResourceNotFoundException;
-import com.customersupporthub.ticket.infra.TicketEntity;
-import com.customersupporthub.ticket.infra.TicketRepository;
+import com.customersupporthub.tickets.infra.TicketEntity;
+import com.customersupporthub.tickets.infra.TicketRepository;
 import java.time.Instant;
 import java.util.List;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class TicketService {
+public class TicketsService {
 
   private final TicketRepository ticketRepository;
   private final UserRepository userRepository;
 
-  TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
+  TicketsService(TicketRepository ticketRepository, UserRepository userRepository) {
     this.ticketRepository = ticketRepository;
     this.userRepository = userRepository;
   }
 
   @Transactional
-  public TicketEntity createTicket(Long customerId, String title, String description) {
+  public TicketEntity createTicket(@NonNull Long customerId, String title, String description) {
     UserEntity customer = userRepository.findById(customerId)
         .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 

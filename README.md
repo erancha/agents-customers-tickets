@@ -58,12 +58,11 @@ Use the `access_token` as `Authorization: Bearer <token>`.
 
 - `POST /api/auth/token` (public)
 - `GET /api/me`, `PUT /api/me`
-- `POST /api/admin/agents` (ADMIN)
-- `POST /api/agent/customers` (AGENT, or ADMIN with `agentId`)
-- `GET /api/agent/customers` (AGENT; ADMIN optionally filter by `agentId`)
-- `POST /api/customer/tickets` (CUSTOMER)
-- `GET /api/customer/tickets` (CUSTOMER)
-- `GET /api/agent/tickets` (AGENT; ADMIN supports `agentId` + `customerId` filtering)
+- `POST /api/agents` (ADMIN)
+- `POST /api/customers` (AGENT, or ADMIN with `agentId`)
+- `GET /api/customers` (AGENT; ADMIN optionally filter by `agentId`)
+- `POST /api/tickets` (CUSTOMER)
+- `GET /api/tickets` (supports role-based filtering: CUSTOMER sees own, AGENT sees assigned, ADMIN can filter by `agentId` + `customerId`)
 
 ## Scripts
 
@@ -86,31 +85,30 @@ Scripts are available at repo root and are intended to be run from WSL.
   - Entities / repositories:
     - [`src/main/java/com/customersupporthub/identity/infra/UserEntity.java`](src/main/java/com/customersupporthub/identity/infra/UserEntity.java)
     - [`src/main/java/com/customersupporthub/identity/infra/UserRepository.java`](src/main/java/com/customersupporthub/identity/infra/UserRepository.java)
-    - [`src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java`](src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java)
-    - [`src/main/java/com/customersupporthub/ticket/infra/TicketRepository.java`](src/main/java/com/customersupporthub/ticket/infra/TicketRepository.java)
+    - [`src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java`](src/main/java/com/customersupporthub/tickets/infra/TicketEntity.java)
+    - [`src/main/java/com/customersupporthub/ticket/infra/TicketRepository.java`](src/main/java/com/customersupporthub/tickets/infra/TicketRepository.java)
   - MySQL configuration:
     - [`src/main/resources/application.yml`](src/main/resources/application.yml)
     - [`docker-compose.yml`](docker-compose.yml)
 - **Spring Validation**
   - Request DTO annotations are used across controllers, e.g.:
     - [`src/main/java/com/customersupporthub/identity/web/AuthController.java`](src/main/java/com/customersupporthub/identity/web/AuthController.java)
-    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java)
-    - [`src/main/java/com/customersupporthub/ticket/web/CustomerTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/CustomerTicketsController.java)
+    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customers/web/AgentCustomersController.java)
+    - [`src/main/java/com/customersupporthub/ticket/web/TicketsController.java`](src/main/java/com/customersupporthub/tickets/web/TicketsController.java)
 
 ### Functional scope
 
 - **Expose a REST API via Spring MVC**
   - Controllers:
     - [`src/main/java/com/customersupporthub/identity/web/AuthController.java`](src/main/java/com/customersupporthub/identity/web/AuthController.java)
-    - [`src/main/java/com/customersupporthub/identity/web/AdminUsersController.java`](src/main/java/com/customersupporthub/identity/web/AdminUsersController.java)
     - [`src/main/java/com/customersupporthub/identity/web/MeController.java`](src/main/java/com/customersupporthub/identity/web/MeController.java)
-    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java)
-    - [`src/main/java/com/customersupporthub/ticket/web/CustomerTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/CustomerTicketsController.java)
-    - [`src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java)
+    - [`src/main/java/com/customersupporthub/agent/web/AgentController.java`](src/main/java/com/customersupporthub/agents/web/AgentController.java)
+    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customers/web/AgentCustomersController.java)
+    - [`src/main/java/com/customersupporthub/ticket/web/TicketsController.java`](src/main/java/com/customersupporthub/tickets/web/TicketsController.java)
 
 - **Store all information in MySQL via Spring JPA**
   - Config: [`src/main/resources/application.yml`](src/main/resources/application.yml)
-  - JPA entities: [`src/main/java/com/customersupporthub/identity/infra/UserEntity.java`](src/main/java/com/customersupporthub/identity/infra/UserEntity.java), [`src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java`](src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java)
+  - JPA entities: [`src/main/java/com/customersupporthub/identity/infra/UserEntity.java`](src/main/java/com/customersupporthub/identity/infra/UserEntity.java), [`src/main/java/com/customersupporthub/ticket/infra/TicketEntity.java`](src/main/java/com/customersupporthub/tickets/infra/TicketEntity.java)
 
 ### Role-Based Access Control (RBAC)
 
@@ -124,22 +122,22 @@ This layered security ensures that users can only access resources appropriate t
 
 - Role enum: [`src/main/java/com/customersupporthub/identity/domain/Role.java`](src/main/java/com/customersupporthub/identity/domain/Role.java)
 - JWT role claim to authority mapping: [`src/main/java/com/customersupporthub/identity/infra/SecurityConfig.java`](src/main/java/com/customersupporthub/identity/infra/SecurityConfig.java)
-- Examples of method-level security: [`src/main/java/com/customersupporthub/identity/web/AdminUsersController.java`](src/main/java/com/customersupporthub/identity/web/AdminUsersController.java), [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java), [`src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java)
+- Examples of method-level security: [`src/main/java/com/customersupporthub/agent/web/AgentController.java`](src/main/java/com/customersupporthub/agents/web/AgentController.java), [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customers/web/AgentCustomersController.java), [`src/main/java/com/customersupporthub/ticket/web/TicketsController.java`](src/main/java/com/customersupporthub/tickets/web/TicketsController.java)
 
 ### Customer management
 
 - **Allow AGENTS only to create a new customer (under that AGENT)**
   - Endpoint + authorization + association to agent:
-    - `POST /api/agent/customers`
-    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java)
+    - `POST /api/customers`
+    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customers/web/AgentCustomersController.java)
   - Persistence model for agent/customer relationship:
     - `UserEntity.agentId`
     - [`src/main/java/com/customersupporthub/identity/infra/UserEntity.java`](src/main/java/com/customersupporthub/identity/infra/UserEntity.java)
 
 - **Allow AGENTS to query for all their customers**
-  - `GET /api/agent/customers`
-  - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java)
-  - [`src/main/java/com/customersupporthub/customer/application/CustomerService.java`](src/main/java/com/customersupporthub/customer/application/CustomerService.java)
+  - `GET /api/customers`
+  - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customers/web/AgentCustomersController.java)
+  - [`src/main/java/com/customersupporthub/customer/application/CustomerService.java`](src/main/java/com/customersupporthub/customers/application/CustomerService.java)
 
 - **Allow AGENTS to update their own profile**
   - `PUT /api/me`
@@ -153,14 +151,14 @@ This layered security ensures that users can only access resources appropriate t
 ### Tickets management
 
 - **Allow customers to create new tickets and get tickets created/owned by them**
-  - `POST /api/customer/tickets`, `GET /api/customer/tickets`
-  - [`src/main/java/com/customersupporthub/ticket/web/CustomerTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/CustomerTicketsController.java)
-  - [`src/main/java/com/customersupporthub/ticket/application/TicketService.java`](src/main/java/com/customersupporthub/ticket/application/TicketService.java)
+  - `POST /api/tickets` (create), `GET /api/tickets` (list customer's tickets)
+  - [`src/main/java/com/customersupporthub/ticket/web/TicketsController.java`](src/main/java/com/customersupporthub/tickets/web/TicketsController.java)
+  - [`src/main/java/com/customersupporthub/ticket/application/TicketService.java`](src/main/java/com/customersupporthub/tickets/application/TicketService.java)
 
 - **Allow agents to query/search tickets created by their own customers**
-  - `GET /api/agent/tickets` (supports optional filtering)
-  - [`src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java`](src/main/java/com/customersupporthub/ticket/web/AgentTicketsController.java)
-  - [`src/main/java/com/customersupporthub/ticket/application/TicketService.java`](src/main/java/com/customersupporthub/ticket/application/TicketService.java)
+  - `GET /api/tickets` (agents see assigned tickets; supports optional `customerId` filtering)
+  - [`src/main/java/com/customersupporthub/ticket/web/TicketsController.java`](src/main/java/com/customersupporthub/tickets/web/TicketsController.java)
+  - [`src/main/java/com/customersupporthub/ticket/application/TicketService.java`](src/main/java/com/customersupporthub/tickets/application/TicketService.java)
 
 ### Security considerations
 
@@ -179,7 +177,7 @@ This layered security ensures that users can only access resources appropriate t
 - **Validate all incoming requests (Spring validation)**
   - Examples:
     - [`src/main/java/com/customersupporthub/identity/web/AuthController.java`](src/main/java/com/customersupporthub/identity/web/AuthController.java)
-    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java)
+    - [`src/main/java/com/customersupporthub/customer/web/AgentCustomersController.java`](src/main/java/com/customersupporthub/customers/web/AgentCustomersController.java)
     - [`src/main/java/com/customersupporthub/identity/web/MeController.java`](src/main/java/com/customersupporthub/identity/web/MeController.java)
 
 - **Return correct HTTP statuses (200/400/401/403/404/409)**
@@ -199,7 +197,7 @@ This layered security ensures that users can only access resources appropriate t
 
 ### Unit testing
 
-- Unit tests to **some services** : [`src/test/java/com/customersupporthub/customer/application/CustomerServiceTest.java`](src/test/java/com/customersupporthub/customer/application/CustomerServiceTest.java)
+- Unit tests to **some services** : [`src/test/java/com/customersupporthub/customer/application/CustomerServiceTest.java`](src/test/java/com/customersupporthub/customers/application/CustomerServiceTest.java)
 
 - At least 1 **security-aware** unit test : `meRequiresAuthentication` in [`src/test/java/com/customersupporthub/SecurityIntegrationTest.java`](src/test/java/com/customersupporthub/SecurityIntegrationTest.java)
 

@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessException;
@@ -66,17 +65,21 @@ class ApiExceptionHandler {
   }
 
   // Database availability handlers - matched by specificity, not order
-  // Spring matches on the most specific exception type in the inheritance hierarchy
-  @ExceptionHandler({CannotCreateTransactionException.class, DataAccessResourceFailureException.class})
+  // Spring matches on the most specific exception type in the inheritance
+  // hierarchy
+  @ExceptionHandler({ CannotCreateTransactionException.class, DataAccessResourceFailureException.class })
   ResponseEntity<ApiErrorResponse> handleDatabaseUnavailable(Exception ex, HttpServletRequest req) {
     log.warn("Database unavailable: {}", ex.getClass().getSimpleName());
-    return error(HttpStatus.SERVICE_UNAVAILABLE, "Database service temporarily unavailable. Please retry after a moment.", req);
+    return error(HttpStatus.SERVICE_UNAVAILABLE,
+        "Database service temporarily unavailable. Please retry after a moment.", req);
   }
 
   @ExceptionHandler(TransientDataAccessException.class)
-  ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex, HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex,
+      HttpServletRequest req) {
     log.warn("Transient database error (may be temporary): {}", ex.getMessage());
-    return error(HttpStatus.SERVICE_UNAVAILABLE, "Database service temporarily unavailable. Please retry after a moment.", req);
+    return error(HttpStatus.SERVICE_UNAVAILABLE,
+        "Database service temporarily unavailable. Please retry after a moment.", req);
   }
 
   @ExceptionHandler(JpaSystemException.class)
@@ -84,14 +87,16 @@ class ApiExceptionHandler {
     log.warn("JPA system error: {}", ex.getMessage());
     // Check if the root cause is a database connectivity issue
     if (isCausedByDatabaseUnavailability(ex)) {
-      return error(HttpStatus.SERVICE_UNAVAILABLE, "Database service temporarily unavailable. Please retry after a moment.", req);
+      return error(HttpStatus.SERVICE_UNAVAILABLE,
+          "Database service temporarily unavailable. Please retry after a moment.", req);
     }
     // If not a connection issue, treat as internal server error
     return error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getClass().getSimpleName() + ": " + ex.getMessage(), req);
   }
 
   /**
-   * Checks if an exception is caused by database unavailability by examining the cause chain.
+   * Checks if an exception is caused by database unavailability by examining the
+   * cause chain.
    * Looks for SQLException or connection-related exceptions in the stack.
    */
   private boolean isCausedByDatabaseUnavailability(Throwable ex) {
@@ -102,7 +107,7 @@ class ApiExceptionHandler {
         return true;
       }
       // Check for Spring data access errors wrapping connection issues
-      if (cause instanceof TransientDataAccessException || 
+      if (cause instanceof TransientDataAccessException ||
           cause instanceof DataAccessResourceFailureException) {
         return true;
       }

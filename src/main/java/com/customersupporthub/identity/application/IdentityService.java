@@ -5,6 +5,8 @@ import com.customersupporthub.identity.infra.UserEntity;
 import com.customersupporthub.identity.infra.UserRepository;
 import com.customersupporthub.shared.error.ConflictException;
 import com.customersupporthub.shared.error.ResourceNotFoundException;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +22,7 @@ public class IdentityService {
   }
 
   @Transactional(readOnly = true)
-  public UserEntity requireUser(Long id) {
+  public UserEntity requireUser(@NonNull Long id) {
     return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
 
@@ -30,7 +32,8 @@ public class IdentityService {
   }
 
   @Transactional
-  public UserEntity createUser(String username, String rawPassword, Role role, Long agentId, String fullName, String email) {
+  public UserEntity createUser(String username, String rawPassword, Role role, Long agentId, String fullName,
+      String email) {
     if (userRepository.existsByUsername(username)) {
       throw new ConflictException("Username already exists");
     }
@@ -56,7 +59,7 @@ public class IdentityService {
   }
 
   @Transactional
-  public UserEntity updateProfile(Long userId, String fullName, String email) {
+  public UserEntity updateProfile(@NonNull Long userId, String fullName, String email) {
     UserEntity u = requireUser(userId);
     u.setFullName(fullName);
     u.setEmail(email);

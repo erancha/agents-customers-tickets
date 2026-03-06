@@ -1,10 +1,12 @@
-package com.customersupporthub.customer.application;
+package com.customersupporthub.customers.application;
 
 import com.customersupporthub.identity.domain.Role;
 import com.customersupporthub.identity.infra.UserEntity;
 import com.customersupporthub.identity.infra.UserRepository;
 import com.customersupporthub.shared.error.ResourceNotFoundException;
 import java.util.List;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +25,7 @@ public class CustomerService {
   }
 
   @Transactional(readOnly = true)
-  UserEntity requireCustomer(Long customerId) {
+  UserEntity requireCustomer(@NonNull Long customerId) {
     UserEntity u = userRepository.findById(customerId)
         .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     if (u.getRole() != Role.CUSTOMER) {

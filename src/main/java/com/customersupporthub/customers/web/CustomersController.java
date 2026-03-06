@@ -1,6 +1,6 @@
-package com.customersupporthub.customer.web;
+package com.customersupporthub.customers.web;
 
-import com.customersupporthub.customer.application.CustomerService;
+import com.customersupporthub.customers.application.CustomerService;
 import com.customersupporthub.identity.api.CurrentUser;
 import com.customersupporthub.identity.api.CurrentUserProvider;
 import com.customersupporthub.identity.application.IdentityService;
@@ -24,16 +24,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/agent/customers")
+@RequestMapping("/api/customers")
 @Validated
-class AgentCustomersController {
+class CustomersController {
 
   private final CurrentUserProvider currentUserProvider;
   private final IdentityService identityService;
   private final CustomerService customerService;
   private final UserRepository userRepository;
 
-  AgentCustomersController(CurrentUserProvider currentUserProvider, IdentityService identityService,
+  CustomersController(CurrentUserProvider currentUserProvider, IdentityService identityService,
       CustomerService customerService, UserRepository userRepository) {
     this.currentUserProvider = currentUserProvider;
     this.identityService = identityService;
