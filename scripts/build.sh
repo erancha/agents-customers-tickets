@@ -14,9 +14,9 @@ show_help() {
 Usage: ./build.sh [OPTIONS]
 
 Options:
-  --clean             Run 'mvn clean' phase
-  --skip-tests        Skip running tests
-  --help              Show this help message
+  --clean             Runs 'mvn clean' phase
+  --skip-tests        Skips running tests (otherwise runs 'mvn test')
+  --help              Shows this help message
 
 Examples:
   ./build.sh                      # No clean + run tests (default)

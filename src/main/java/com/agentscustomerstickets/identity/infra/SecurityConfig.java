@@ -56,17 +56,31 @@ class SecurityConfig {
   }
 
   @Bean
+  /**
+   * Converts a validated JWT into the authentication shape used by the app.
+   *
+   * Expected claims:
+   * - uid: numeric internal user id
+   * - role: enum value from {@link Role} used to build ROLE_* authorities
+   *
+   * The returned token exposes a {@link JwtPrincipal} via {@code getPrincipal()}
+   * so controllers/services can access typed user context instead of raw claims.
+   */
   Function<Jwt, JwtAuthenticationToken> jwtAuthConverter() {
     return jwt -> {
       Long uid = jwt.getClaim("uid");
       if (uid == null) {
         throw new IllegalArgumentException("JWT claim 'uid' is required");
       }
+
       String roleStr = jwt.getClaim("role");
       Role role = Role.valueOf(roleStr);
 
+      // Spring Security checks roles through authorities with the ROLE_ prefix.
       Collection<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
       JwtPrincipal principal = new JwtPrincipal(uid, jwt.getSubject(), role);
+
+      // Keep the default token behavior while exposing the typed principal.
       return new JwtAuthenticationToken(jwt, authorities, principal.username()) {
         @Override
         public Object getPrincipal() {
