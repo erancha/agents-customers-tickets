@@ -141,4 +141,22 @@ class SecurityIntegrationTest {
                                 .header("Authorization", "Bearer " + customerToken))
                                 .andExpect(status().isForbidden());
         }
+
+        @Test
+        void unknownAgentsSubPathReturnsNotFound() throws Exception {
+                String adminTokenBody = mockMvc.perform(post("/api/auth/token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                String adminToken = adminTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*",
+                                "$1");
+
+                mockMvc.perform(get("/api/agents/x")
+                                .header("Authorization", "Bearer " + adminToken))
+                                .andExpect(status().isNotFound());
+        }
 }

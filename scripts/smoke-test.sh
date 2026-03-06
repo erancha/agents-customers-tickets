@@ -70,6 +70,42 @@ uuid() {
   fail "Expected WSL environment with /proc/sys/kernel/random/uuid available."
 }
 
+print_http_error() {
+  local method="$1"
+  local url="$2"
+  local http_code="$3"
+  local response="$4"
+
+  red "HTTP ${method} failed: ${url} (status: ${http_code})"
+
+  case "$http_code" in
+    401)
+      red "Reason: Unauthorized. The token is missing, invalid, or expired."
+      ;;
+    403)
+      red "Reason: Forbidden. Authenticated, but not allowed for this resource (wrong role/token)."
+      if [[ "$url" == *"/api/agents"* ]]; then
+        red "Hint: /api/agents is admin-only in this smoke test. Use the admin token for this step."
+      fi
+      ;;
+    404)
+      red "Reason: Endpoint not found. Check BASE_URL and API path."
+      ;;
+    409)
+      red "Reason: Conflict. The resource may already exist."
+      ;;
+    422)
+      red "Reason: Validation failed. Request payload is not acceptable."
+      ;;
+    500)
+      red "Reason: Server error. Check application logs for details."
+      ;;
+  esac
+
+  red "Response body:"
+  echo "$response" | pretty_json >&2
+}
+
 json_get_raw() {
   local url="$1"
   local token="$2"
@@ -80,8 +116,7 @@ json_get_raw() {
   response=$(echo "$response" | head -n-1)
   
   if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
-    red "HTTP GET failed: $url (status: $http_code)"
-    echo "$response" >&2
+    print_http_error "GET" "$url" "$http_code" "$response"
     return 1
   fi
   echo "$response"
@@ -104,8 +139,7 @@ json_post_raw() {
   response=$(echo "$response" | head -n-1)
   
   if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
-    red "HTTP POST failed: $url (status: $http_code)"
-    echo "$response" >&2
+    print_http_error "POST" "$url" "$http_code" "$response"
     return 1
   fi
   echo "$response"
@@ -224,7 +258,7 @@ main() {
   local agent_token
   agent_token=$(get_token "$agent_username" "$DEMO_AGENT_PASSWORD")
 
-  step "Listing agents (admin)..."
+  step "Listing agents (admin token required)..."
   json_get "$BASE_URL/api/agents" "$admin_token"
   echo
 

@@ -18,6 +18,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 class ApiExceptionHandler {
@@ -43,8 +44,8 @@ class ApiExceptionHandler {
     return error(HttpStatus.FORBIDDEN, "Forbidden", req);
   }
 
-  @ExceptionHandler(ResourceNotFoundException.class)
-  ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest req) {
+  @ExceptionHandler({ ResourceNotFoundException.class, NoResourceFoundException.class })
+  ResponseEntity<ApiErrorResponse> handleNotFound(Exception ex, HttpServletRequest req) {
     return error(HttpStatus.NOT_FOUND, ex.getMessage(), req);
   }
 
