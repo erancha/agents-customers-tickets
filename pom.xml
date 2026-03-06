@@ -10,11 +10,11 @@
     <relativePath/>
   </parent>
 
-  <groupId>com.customersupporthub</groupId>
-  <artifactId>customer-support-hub</artifactId>
+  <groupId>com.agentscustomerstickets</groupId>
+  <artifactId>agents-customes-tickets</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>customer-support-hub</name>
-  <description>Customer Support Hub</description>
+  <name>agents-customes-tickets</name>
+  <description>Agents Customers Tickets</description>
 
   <properties>
     <java.version>21</java.version>

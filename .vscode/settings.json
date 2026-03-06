@@ -1,6 +1,5 @@
 {
-   "cSpell.words": [
-      "customersupporthub"
-   ],
-   "java.compile.nullAnalysis.mode": "automatic"
+  "cSpell.words": ["agentscustomerstickets"],
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

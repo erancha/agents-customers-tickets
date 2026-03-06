@@ -2,9 +2,9 @@ services:
   mysql:
     image: mysql:8.4
     environment:
-      MYSQL_DATABASE: supporthub_db
-      MYSQL_USER: supporthub
-      MYSQL_PASSWORD: supporthub123
+      MYSQL_DATABASE: agentscustomerstickets_db
+      MYSQL_USER: agentscustomerstickets
+      MYSQL_PASSWORD: agentscustomerstickets123
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3306:3306"

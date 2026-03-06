@@ -3,12 +3,12 @@ server:
 
 spring:
   application:
-    name: customer-support-hub
+    name: agents-customes-tickets
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/supporthub_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:supporthub}
-    password: ${DB_PASSWORD:supporthub123}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:agentscustomerstickets}
+    password: ${DB_PASSWORD:agentscustomerstickets123}
 
   jpa:
     hibernate:
@@ -19,6 +19,6 @@ spring:
 
 security:
   jwt:
-    issuer: ${JWT_ISSUER:customer-support-hub}
+    issuer: ${JWT_ISSUER:agents-customes-tickets}
     secret: ${JWT_SECRET:change-me-in-prod-change-me-in-prod-change-me}
     accessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:60}

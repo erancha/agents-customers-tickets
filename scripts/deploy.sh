@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-APP_NAME="customer-support-hub"
+APP_NAME="agents-customes-tickets"
 IMAGE_NAME="${APP_NAME}:local"
 CONTAINER_NAME="$APP_NAME"
 
