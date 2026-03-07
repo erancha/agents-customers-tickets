@@ -3,6 +3,7 @@ package com.agentscustomerstickets.users.infra;
 import com.agentscustomerstickets.users.api.User;
 import com.agentscustomerstickets.users.api.UserManagement;
 import com.agentscustomerstickets.users.api.Role;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Converts managed {@link UserEntity} instances to API-facing {@link User} DTOs.</p>
  */
 @Component
+@ConditionalOnProperty(name = "users.integration.mode", havingValue = "embedded", matchIfMissing = true)
 class UserManagementAdapter implements UserManagement {
 
    private final UsersService usersService;

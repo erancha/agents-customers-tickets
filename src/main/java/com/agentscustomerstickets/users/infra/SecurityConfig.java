@@ -51,6 +51,7 @@ class SecurityConfig {
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.POST, "/api/auth/token").permitAll()
+            .requestMatchers("/internal/users/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/", "/health").permitAll()
             .requestMatchers("/actuator/**").permitAll()
             .anyRequest().authenticated()) // require JWT authentication for every other request

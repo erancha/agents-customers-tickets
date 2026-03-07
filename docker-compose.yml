@@ -30,8 +30,30 @@ services:
       DB_URL: jdbc:mysql://mysql:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       DB_USERNAME: agentscustomerstickets
       DB_PASSWORD: agentscustomerstickets123
+      USERS_INTEGRATION_MODE: ${USERS_INTEGRATION_MODE:-embedded}
+      USERS_INTEGRATION_BASE_URL: ${USERS_INTEGRATION_BASE_URL:-http://users-service:8080}
+      USERS_INTEGRATION_INTERNAL_API_KEY: ${USERS_INTEGRATION_INTERNAL_API_KEY:-internal-users-key}
     ports:
       - "${APP_PORT:-8080}:8080"
+
+  users-service:
+    profiles: ["users-ms"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agents-customers-tickets:local
+    container_name: agents-customers-tickets-users
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      DB_USERNAME: agentscustomerstickets
+      DB_PASSWORD: agentscustomerstickets123
+      USERS_INTEGRATION_MODE: embedded
+      USERS_INTEGRATION_INTERNAL_API_KEY: ${USERS_INTEGRATION_INTERNAL_API_KEY:-internal-users-key}
+    ports:
+      - "${USERS_SERVICE_PORT:-8081}:8080"
 
 volumes:
   mysql_data:

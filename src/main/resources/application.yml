@@ -22,3 +22,9 @@ security:
     issuer: ${JWT_ISSUER:agents-customers-tickets}
     secret: ${JWT_SECRET:change-me-in-prod-change-me-in-prod-change-me}
     accessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:60}
+
+users:
+  integration:
+    mode: ${USERS_INTEGRATION_MODE:embedded}
+    base-url: ${USERS_INTEGRATION_BASE_URL:http://localhost:8081}
+    internal-api-key: ${USERS_INTEGRATION_INTERNAL_API_KEY:internal-users-key}

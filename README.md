@@ -17,22 +17,13 @@ Users persistence internals are now encapsulated inside the `users` module:
 
 [![Architecture diagram](docs/architecture.svg)](docs/architecture.svg)
 
+See [Appendix: Phase 2 Users Internal Microservice](#appendix-phase-2-users-internal-microservice) for architecture details, file mapping, and phase-2 run commands.
+
 ## Prerequisites
 
 - Java 21
 - Spring Boot 3.x
 - Docker (optional, for MySQL)
-
-## Deployment
-
-With [docker-compose.yml](docker-compose.yml):
-
-```bash
-# Start MySQL and run the application service
-docker compose up -d
-```
-
-The application service listens on `http://localhost:8080`.
 
 ## Development
 
@@ -46,6 +37,17 @@ docker compose up -d mysql
 # Run the application service
 java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
 ```
+
+## Deployment
+
+With [docker-compose.yml](docker-compose.yml):
+
+```bash
+# Start MySQL and run the application service
+docker compose up -d
+```
+
+The application service listens on `http://localhost:8080`.
 
 ## Scripts
 
@@ -125,3 +127,32 @@ Users can only access resources appropriate to their role.
 - **[`README.md`](README.md)** (the current file) describing the project and how to build and run
 - **[`Dockerfile`](Dockerfile)** for the application service
 - **[`docker-compose.yml`](docker-compose.yml)** for local orchestration (MySQL + application service)
+
+## Appendix: Phase 2 Users Internal Microservice
+
+Phase 2 keeps the same public module contracts (`users.api`) but allows runtime indirection for users operations:
+
+- **Local execution (embedded)**: modules call users behavior in-process through:
+  - [`users/infra/UserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserDirectoryAdapter.java)
+  - [`users/infra/UserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserManagementAdapter.java)
+- **Remote execution (users as internal microservice)**: modules still depend on the same `users.api` interfaces, but Spring wires REST-backed adapters:
+  - [`users/infra/remote/RemoteUsersClientConfig.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUsersClientConfig.java)
+  - [`users/infra/remote/RemoteUserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUserDirectoryAdapter.java)
+  - [`users/infra/remote/RemoteUserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUserManagementAdapter.java)
+  - Internal endpoints are exposed by [`users/infra/remote/InternalUsersController.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/InternalUsersController.java).
+
+This means controllers in other modules do not change between phases; only runtime wiring changes through configuration.
+
+### Development
+
+```bash
+# Build the app in phase 2 mode
+./scripts/build.sh --users-ms
+```
+
+### Deployment
+
+```bash
+# Start MySQL + app + dedicated users-service container
+USERS_INTEGRATION_MODE=remote docker compose --profile users-ms up -d --build
+```

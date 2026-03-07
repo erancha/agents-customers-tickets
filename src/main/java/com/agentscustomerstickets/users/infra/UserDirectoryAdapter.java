@@ -5,6 +5,7 @@ import com.agentscustomerstickets.users.api.UserDirectory;
 import com.agentscustomerstickets.users.api.Role;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Maps {@link UserEntity} records into API-facing {@link User} DTOs for read operations.</p>
  */
 @Component
+@ConditionalOnProperty(name = "users.integration.mode", havingValue = "embedded", matchIfMissing = true)
 class UserDirectoryAdapter implements UserDirectory {
 
    private final UserRepository userRepository;
