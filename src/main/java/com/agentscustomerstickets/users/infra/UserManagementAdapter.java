@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 class UserManagementAdapter implements UserManagement {
 
-   private final UsersService identityService;
+   private final UsersService usersService;
 
-   UserManagementAdapter(UsersService identityService) {
-      this.identityService = identityService;
+   UserManagementAdapter(UsersService usersService) {
+      this.usersService = usersService;
    }
 
    @Override
@@ -29,7 +29,7 @@ class UserManagementAdapter implements UserManagement {
          Long agentId,
          @NonNull String fullName,
          @NonNull String email) {
-      UserEntity created = identityService.createUser(username, rawPassword, role, agentId, fullName, email);
+      UserEntity created = usersService.createUser(username, rawPassword, role, agentId, fullName, email);
       return toUser(created);
    }
 
@@ -39,7 +39,7 @@ class UserManagementAdapter implements UserManagement {
          @NonNull Long userId,
          @NonNull String fullName,
          @NonNull String email) {
-      UserEntity updated = identityService.updateProfile(userId, fullName, email);
+      UserEntity updated = usersService.updateProfile(userId, fullName, email);
       return toUser(updated);
    }
 

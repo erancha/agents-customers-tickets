@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 class AuthController {
 
-  private final UsersService identityService;
+  private final UsersService usersService;
   private final JwtService jwtService;
 
   @Value("${security.jwt.accessTokenMinutes:60}")
   private long accessTokenMinutes;
 
-  AuthController(UsersService identityService, JwtService jwtService) {
-    this.identityService = identityService;
+  AuthController(UsersService usersService, JwtService jwtService) {
+    this.usersService = usersService;
     this.jwtService = jwtService;
   }
 
@@ -45,7 +45,7 @@ class AuthController {
 
   @PostMapping("/token")
   ResponseEntity<TokenResponse> token(@Valid @RequestBody TokenRequest req) {
-    User user = identityService.authenticate(req.username(), req.password());
+    User user = usersService.authenticate(req.username(), req.password());
     String token = jwtService.issueAccessToken(user.id(), user.username(), user.role());
     return ResponseEntity.ok(new TokenResponse(token, "Bearer", accessTokenMinutes * 60, Instant.now()));
   }

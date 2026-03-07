@@ -1,25 +1,24 @@
 # Agents Customers Tickets
 
-Spring Boot 3.x (Java 21) backend service implemented as a modular monolith (clear internal modules, single deployable).
+Spring Boot backend service implemented as a modular monolith (clear internal modules, single deployable).
 
 ## Modular monolith boundaries (phase 1)
 
 Users persistence internals are now encapsulated inside the `users` module:
 
-- `UserRepository` and `IdentityService` remain in `users.infra` and are not consumed directly by other modules.
+- `UserRepository` and `UsersService` remain in `users.infra` and are not consumed directly by other modules.
 - Other modules depend on `users.api` contracts for user read/write access:
   - [`users/api/User.java`](src/main/java/com/agentscustomerstickets/users/api/User.java)
   - [`users/api/UserDirectory.java`](src/main/java/com/agentscustomerstickets/users/api/UserDirectory.java)
   - [`users/api/UserManagement.java`](src/main/java/com/agentscustomerstickets/users/api/UserManagement.java)
-- Infrastructure adapter inside users:
+- Infrastructure adapter inside the `users` module:
   - [`users/infra/UserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserDirectoryAdapter.java)
   - [`users/infra/UserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserManagementAdapter.java)
-
-This is the first step of the modular-monolith migration: consumers in `agents`, `customers`, and `tickets` now query users through `users.api` instead of `users.infra`, and user creation/update from other modules goes through `UserManagement`.
 
 ## Prerequisites
 
 - Java 21
+- Spring Boot 3.x
 - Docker (optional, for MySQL)
 
 ## Deployment
@@ -45,29 +44,6 @@ docker compose up -d mysql
 # Run the application service
 java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
 ```
-
-## Smoke test
-
-In another terminal, you can run end-to-end smoke test:
-
-```bash
-./scripts/smoke-test.sh
-```
-
-A default admin user is created on startup:
-
-- Username: `admin`
-- Password: `admin123`
-
-Get a JWT:
-
-```bash
-curl -s -X POST http://localhost:8080/api/auth/token \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"admin","password":"admin123"}'
-```
-
-Use the `access_token` as `Authorization: Bearer <token>`.
 
 ## Scripts
 
@@ -134,7 +110,7 @@ Users can only access resources appropriate to their role.
     - `POST /api/auth/token`
     - [`users/web/AuthController.java`](src/main/java/com/agentscustomerstickets/users/web/AuthController.java)
   - Authentication logic:
-    - [`users/infra/IdentityService.java`](src/main/java/com/agentscustomerstickets/users/infra/IdentityService.java)
+    - [`users/infra/UsersService.java`](src/main/java/com/agentscustomerstickets/users/infra/UsersService.java)
 
 ### Unit testing
 
