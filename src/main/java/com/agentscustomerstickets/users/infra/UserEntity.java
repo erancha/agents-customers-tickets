@@ -1,6 +1,6 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
-import com.agentscustomerstickets.identity.domain.Role;
+import com.agentscustomerstickets.users.api.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
     @Index(name = "ix_users_username", columnList = "username", unique = true),
     @Index(name = "ix_users_agent_id", columnList = "agent_id")
 })
-public class UserEntity {
+class UserEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,59 +41,59 @@ public class UserEntity {
   @Column(nullable = false, length = 200)
   private String email;
 
-  public Long getId() {
+  Long getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  void setId(Long id) {
     this.id = id;
   }
 
-  public String getUsername() {
+  String getUsername() {
     return username;
   }
 
-  public void setUsername(String username) {
+  void setUsername(String username) {
     this.username = username;
   }
 
-  public String getPasswordHash() {
+  String getPasswordHash() {
     return passwordHash;
   }
 
-  public void setPasswordHash(String passwordHash) {
+  void setPasswordHash(String passwordHash) {
     this.passwordHash = passwordHash;
   }
 
-  public Role getRole() {
+  Role getRole() {
     return role;
   }
 
-  public void setRole(Role role) {
+  void setRole(Role role) {
     this.role = role;
   }
 
-  public Long getAgentId() {
+  Long getAgentId() {
     return agentId;
   }
 
-  public void setAgentId(Long agentId) {
+  void setAgentId(Long agentId) {
     this.agentId = agentId;
   }
 
-  public String getFullName() {
+  String getFullName() {
     return fullName;
   }
 
-  public void setFullName(String fullName) {
+  void setFullName(String fullName) {
     this.fullName = fullName;
   }
 
-  public String getEmail() {
+  String getEmail() {
     return email;
   }
 
-  public void setEmail(String email) {
+  void setEmail(String email) {
     this.email = email;
   }
 }

@@ -1,4 +1,4 @@
-package com.agentscustomerstickets.identity.application;
+package com.agentscustomerstickets.users.application;
 
 public interface PasswordHasher {
   String hash(String raw);

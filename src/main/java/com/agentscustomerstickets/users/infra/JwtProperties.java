@@ -1,4 +1,4 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

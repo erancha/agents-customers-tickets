@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.agentscustomerstickets.identity.domain.Role;
-import com.agentscustomerstickets.identity.infra.UserEntity;
-import com.agentscustomerstickets.identity.infra.UserRepository;
+import com.agentscustomerstickets.users.api.User;
+import com.agentscustomerstickets.users.api.UserDirectory;
+import com.agentscustomerstickets.users.api.Role;
 import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -17,19 +17,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 // Unit test: isolate CustomerService behavior without starting Spring or touching a real database.
-// Mockito provides a fake UserRepository so we can control findById(...) results deterministically.
+// Mockito provides a fake UserDirectory so we can control findById(...) results deterministically.
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
   @Mock
-  UserRepository userRepository;
+  UserDirectory userDirectory;
 
   @InjectMocks
   CustomerService customerService;
 
   @Test
   void requireCustomerThrowsWhenUserMissing() {
-    when(userRepository.findById(123L)).thenReturn(Optional.empty());
+    when(userDirectory.findById(123L)).thenReturn(Optional.empty());
 
     ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
         () -> customerService.requireCustomer(123L));
@@ -38,11 +38,9 @@ class CustomerServiceTest {
 
   @Test
   void requireCustomerThrowsWhenUserIsNotCustomerRole() {
-    UserEntity u = new UserEntity();
-    u.setId(10L);
-    u.setRole(Role.AGENT);
+    User user = new User(10L, "agent1", Role.AGENT, null, "Agent One", "a1@example.com");
 
-    when(userRepository.findById(10L)).thenReturn(Optional.of(u));
+    when(userDirectory.findById(10L)).thenReturn(Optional.of(user));
 
     ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
         () -> customerService.requireCustomer(10L));
@@ -51,13 +49,11 @@ class CustomerServiceTest {
 
   @Test
   void requireCustomerReturnsUserWhenRoleIsCustomer() {
-    UserEntity u = new UserEntity();
-    u.setId(11L);
-    u.setRole(Role.CUSTOMER);
+    User user = new User(11L, "customer1", Role.CUSTOMER, 1L, "Customer One", "c1@example.com");
 
-    when(userRepository.findById(11L)).thenReturn(Optional.of(u));
+    when(userDirectory.findById(11L)).thenReturn(Optional.of(user));
 
-    UserEntity out = customerService.requireCustomer(11L);
-    assertSame(u, out);
+    User out = customerService.requireCustomer(11L);
+    assertSame(user, out);
   }
 }

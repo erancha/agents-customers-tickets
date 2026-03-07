@@ -1,8 +1,8 @@
-package com.agentscustomerstickets.identity.web;
+package com.agentscustomerstickets.users.web;
 
-import com.agentscustomerstickets.identity.application.IdentityService;
-import com.agentscustomerstickets.identity.application.JwtService;
-import com.agentscustomerstickets.identity.infra.UserEntity;
+import com.agentscustomerstickets.users.application.JwtService;
+import com.agentscustomerstickets.users.api.User;
+import com.agentscustomerstickets.users.infra.UsersService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 class AuthController {
 
-  private final IdentityService identityService;
+  private final UsersService identityService;
   private final JwtService jwtService;
 
   @Value("${security.jwt.accessTokenMinutes:60}")
   private long accessTokenMinutes;
 
-  AuthController(IdentityService identityService, JwtService jwtService) {
+  AuthController(UsersService identityService, JwtService jwtService) {
     this.identityService = identityService;
     this.jwtService = jwtService;
   }
@@ -45,8 +45,8 @@ class AuthController {
 
   @PostMapping("/token")
   ResponseEntity<TokenResponse> token(@Valid @RequestBody TokenRequest req) {
-    UserEntity u = identityService.authenticate(req.username(), req.password());
-    String token = jwtService.issueAccessToken(u.getId(), u.getUsername(), u.getRole());
+    User user = identityService.authenticate(req.username(), req.password());
+    String token = jwtService.issueAccessToken(user.id(), user.username(), user.role());
     return ResponseEntity.ok(new TokenResponse(token, "Bearer", accessTokenMinutes * 60, Instant.now()));
   }
 }

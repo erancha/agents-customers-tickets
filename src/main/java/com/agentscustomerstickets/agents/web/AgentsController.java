@@ -1,9 +1,9 @@
 package com.agentscustomerstickets.agents.web;
 
-import com.agentscustomerstickets.identity.application.IdentityService;
-import com.agentscustomerstickets.identity.domain.Role;
-import com.agentscustomerstickets.identity.infra.UserEntity;
-import com.agentscustomerstickets.identity.infra.UserRepository;
+import com.agentscustomerstickets.users.api.User;
+import com.agentscustomerstickets.users.api.UserDirectory;
+import com.agentscustomerstickets.users.api.UserManagement;
+import com.agentscustomerstickets.users.api.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 class AgentsController {
 
-  private final IdentityService identityService;
-  private final UserRepository userRepository;
+  private final UserDirectory userDirectory;
+  private final UserManagement userManagement;
 
-  AgentsController(IdentityService identityService, UserRepository userRepository) {
-    this.identityService = identityService;
-    this.userRepository = userRepository;
+  AgentsController(UserDirectory userDirectory, UserManagement userManagement) {
+    this.userDirectory = userDirectory;
+    this.userManagement = userManagement;
   }
 
   record CreateAgentRequest(
@@ -40,15 +40,16 @@ class AgentsController {
   }
 
   record AgentResponse(Long id, String username, Role role, String fullName, String email) {
-    static AgentResponse from(UserEntity u) {
-      return new AgentResponse(u.getId(), u.getUsername(), u.getRole(), u.getFullName(), u.getEmail());
+    static AgentResponse from(User user) {
+      return new AgentResponse(user.id(), user.username(), user.role(), user.fullName(), user.email());
     }
   }
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   ResponseEntity<AgentResponse> createAgent(@Valid @RequestBody CreateAgentRequest req) {
-    UserEntity created = identityService.createUser(req.username(), req.password(), Role.AGENT, null, req.fullName(),
+    User created = userManagement.createUser(req.username(), req.password(), Role.AGENT, null,
+        req.fullName(),
         req.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(AgentResponse.from(created));
   }
@@ -56,7 +57,7 @@ class AgentsController {
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   ResponseEntity<List<AgentResponse>> listAgents() {
-    List<UserEntity> agents = userRepository.findAllByRole(Role.AGENT);
+    List<User> agents = userDirectory.findAllByRole(Role.AGENT);
     return ResponseEntity.ok(agents.stream().map(AgentResponse::from).toList());
   }
 }

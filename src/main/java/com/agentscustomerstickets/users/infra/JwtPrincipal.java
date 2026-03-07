@@ -1,8 +1,7 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
+import com.agentscustomerstickets.users.api.Role;
 import org.springframework.lang.NonNull;
-
-import com.agentscustomerstickets.identity.domain.Role;
 
 record JwtPrincipal(@NonNull Long userId, String username, Role role) {
 }

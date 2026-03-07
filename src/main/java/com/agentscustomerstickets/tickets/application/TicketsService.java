@@ -1,8 +1,8 @@
 package com.agentscustomerstickets.tickets.application;
 
-import com.agentscustomerstickets.identity.domain.Role;
-import com.agentscustomerstickets.identity.infra.UserEntity;
-import com.agentscustomerstickets.identity.infra.UserRepository;
+import com.agentscustomerstickets.users.api.User;
+import com.agentscustomerstickets.users.api.UserDirectory;
+import com.agentscustomerstickets.users.api.Role;
 import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
 import com.agentscustomerstickets.tickets.infra.TicketEntity;
 import com.agentscustomerstickets.tickets.infra.TicketRepository;
@@ -17,29 +17,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class TicketsService {
 
   private final TicketRepository ticketRepository;
-  private final UserRepository userRepository;
+  private final UserDirectory userDirectory;
 
-  TicketsService(TicketRepository ticketRepository, UserRepository userRepository) {
+  TicketsService(TicketRepository ticketRepository, UserDirectory userDirectory) {
     this.ticketRepository = ticketRepository;
-    this.userRepository = userRepository;
+    this.userDirectory = userDirectory;
   }
 
   @Transactional
   public TicketEntity createTicket(@NonNull Long customerId, String title, String description) {
-    UserEntity customer = userRepository.findById(customerId)
+    User customer = userDirectory.findById(customerId)
         .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-    if (customer.getRole() != Role.CUSTOMER) {
+    if (customer.role() != Role.CUSTOMER) {
       throw new IllegalArgumentException("Only customers can create tickets");
     }
 
-    if (customer.getAgentId() == null) {
+    if (customer.agentId() == null) {
       throw new IllegalArgumentException("Customer is not assigned to an agent");
     }
 
     TicketEntity t = new TicketEntity();
     t.setCustomerId(customerId);
-    t.setAgentId(customer.getAgentId());
+    t.setAgentId(customer.agentId());
     t.setTitle(title);
     t.setDescription(description);
     t.setStatus("OPEN");

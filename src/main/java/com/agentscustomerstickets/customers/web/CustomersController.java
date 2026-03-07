@@ -1,12 +1,12 @@
 package com.agentscustomerstickets.customers.web;
 
 import com.agentscustomerstickets.customers.application.CustomerService;
-import com.agentscustomerstickets.identity.api.CurrentUser;
-import com.agentscustomerstickets.identity.api.CurrentUserProvider;
-import com.agentscustomerstickets.identity.application.IdentityService;
-import com.agentscustomerstickets.identity.domain.Role;
-import com.agentscustomerstickets.identity.infra.UserEntity;
-import com.agentscustomerstickets.identity.infra.UserRepository;
+import com.agentscustomerstickets.users.api.CurrentUser;
+import com.agentscustomerstickets.users.api.CurrentUserProvider;
+import com.agentscustomerstickets.users.api.User;
+import com.agentscustomerstickets.users.api.UserDirectory;
+import com.agentscustomerstickets.users.api.UserManagement;
+import com.agentscustomerstickets.users.api.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -29,16 +29,18 @@ import org.springframework.web.bind.annotation.RestController;
 class CustomersController {
 
   private final CurrentUserProvider currentUserProvider;
-  private final IdentityService identityService;
+  private final UserDirectory userDirectory;
+  private final UserManagement userManagement;
   private final CustomerService customerService;
-  private final UserRepository userRepository;
 
-  CustomersController(CurrentUserProvider currentUserProvider, IdentityService identityService,
-      CustomerService customerService, UserRepository userRepository) {
+  CustomersController(CurrentUserProvider currentUserProvider,
+      UserDirectory userDirectory,
+      UserManagement userManagement,
+      CustomerService customerService) {
     this.currentUserProvider = currentUserProvider;
-    this.identityService = identityService;
+    this.userDirectory = userDirectory;
+    this.userManagement = userManagement;
     this.customerService = customerService;
-    this.userRepository = userRepository;
   }
 
   record CreateCustomerRequest(
@@ -50,8 +52,8 @@ class CustomersController {
   }
 
   record CustomerResponse(Long id, String username, String fullName, String email, Long agentId) {
-    static CustomerResponse from(UserEntity u) {
-      return new CustomerResponse(u.getId(), u.getUsername(), u.getFullName(), u.getEmail(), u.getAgentId());
+    static CustomerResponse from(User user) {
+      return new CustomerResponse(user.id(), user.username(), user.fullName(), user.email(), user.agentId());
     }
   }
 
@@ -69,8 +71,8 @@ class CustomersController {
       agentId = cu.id();
     }
 
-    UserEntity created = identityService.createUser(req.username(), req.password(), Role.CUSTOMER, agentId,
-        req.fullName(), req.email());
+    User created = userManagement.createUser(req.username(), req.password(), Role.CUSTOMER, agentId, req.fullName(),
+        req.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(CustomerResponse.from(created));
   }
 
@@ -83,7 +85,7 @@ class CustomersController {
     Long effectiveAgentId;
     if (cu.role() == Role.ADMIN) {
       if (agentId == null) {
-        List<UserEntity> customers = userRepository.findAllByRole(Role.CUSTOMER);
+        List<User> customers = userDirectory.findAllByRole(Role.CUSTOMER);
         return ResponseEntity.ok(customers.stream().map(CustomerResponse::from).toList());
       }
       effectiveAgentId = agentId;
@@ -91,7 +93,7 @@ class CustomersController {
       effectiveAgentId = cu.id();
     }
 
-    List<UserEntity> customers = customerService.listCustomersForAgent(effectiveAgentId);
+    List<User> customers = customerService.listCustomersForAgent(effectiveAgentId);
     return ResponseEntity.ok(customers.stream().map(CustomerResponse::from).toList());
   }
 }

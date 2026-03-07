@@ -1,7 +1,7 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
-import com.agentscustomerstickets.identity.application.JwtService;
-import com.agentscustomerstickets.identity.domain.Role;
+import com.agentscustomerstickets.users.application.JwtService;
+import com.agentscustomerstickets.users.api.Role;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;

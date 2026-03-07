@@ -1,6 +1,6 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
-import com.agentscustomerstickets.identity.application.PasswordHasher;
+import com.agentscustomerstickets.users.application.PasswordHasher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 

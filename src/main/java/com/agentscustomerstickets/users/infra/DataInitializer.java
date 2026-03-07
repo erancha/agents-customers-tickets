@@ -1,7 +1,6 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
-import com.agentscustomerstickets.identity.application.IdentityService;
-import com.agentscustomerstickets.identity.domain.Role;
+import com.agentscustomerstickets.users.api.Role;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 class DataInitializer {
 
   @Bean
-  CommandLineRunner initDefaultAdmin(IdentityService identityService, UserRepository userRepository) {
+  CommandLineRunner initDefaultAdmin(UsersService identityService, UserRepository userRepository) {
     return args -> {
       if (!userRepository.existsByUsername("admin")) {
         identityService.createUser(

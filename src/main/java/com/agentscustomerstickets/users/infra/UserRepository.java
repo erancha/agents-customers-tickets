@@ -1,11 +1,11 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
-import com.agentscustomerstickets.identity.domain.Role;
+import com.agentscustomerstickets.users.api.Role;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
+interface UserRepository extends JpaRepository<UserEntity, Long> {
   Optional<UserEntity> findByUsername(String username);
 
   boolean existsByUsername(String username);

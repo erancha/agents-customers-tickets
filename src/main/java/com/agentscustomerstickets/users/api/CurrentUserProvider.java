@@ -1,4 +1,4 @@
-package com.agentscustomerstickets.identity.api;
+package com.agentscustomerstickets.users.api;
 
 public interface CurrentUserProvider {
   CurrentUser get();

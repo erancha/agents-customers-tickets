@@ -1,6 +1,21 @@
 # Agents Customers Tickets
 
-Spring Boot 3.x (Java 21) backend service implemented as a package-by-feature monolith (clear internal modules, single deployable).
+Spring Boot 3.x (Java 21) backend service implemented as a modular monolith (clear internal modules, single deployable).
+
+## Modular monolith boundaries (phase 1)
+
+Users persistence internals are now encapsulated inside the `users` module:
+
+- `UserRepository` and `IdentityService` remain in `users.infra` and are not consumed directly by other modules.
+- Other modules depend on `users.api` contracts for user read/write access:
+  - [`users/api/User.java`](src/main/java/com/agentscustomerstickets/users/api/User.java)
+  - [`users/api/UserDirectory.java`](src/main/java/com/agentscustomerstickets/users/api/UserDirectory.java)
+  - [`users/api/UserManagement.java`](src/main/java/com/agentscustomerstickets/users/api/UserManagement.java)
+- Infrastructure adapter inside users:
+  - [`users/infra/UserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserDirectoryAdapter.java)
+  - [`users/infra/UserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserManagementAdapter.java)
+
+This is the first step of the modular-monolith migration: consumers in `agents`, `customers`, and `tickets` now query users through `users.api` instead of `users.infra`, and user creation/update from other modules goes through `UserManagement`.
 
 ## Prerequisites
 
@@ -70,14 +85,14 @@ Scripts are available at repo root and are intended to be run from WSL.
 
 - **Spring Boot 3.x**
   - [`pom.xml`](pom.xml)
-  - [`src/main/java/com/agentscustomerstickets/Application.java`](src/main/java/com/agentscustomerstickets/Application.java)
+  - [`Application.java`](src/main/java/com/agentscustomerstickets/Application.java)
 
 - **Spring Data JPA (Java Persistence API) over MySQL**:
   - Entities / repositories:
-    - [`src/main/java/com/agentscustomerstickets/identity/infra/UserEntity.java`](src/main/java/com/agentscustomerstickets/identity/infra/UserEntity.java)
-    - [`src/main/java/com/agentscustomerstickets/identity/infra/UserRepository.java`](src/main/java/com/agentscustomerstickets/identity/infra/UserRepository.java)
-    - [`src/main/java/com/agentscustomerstickets/tickets/infra/TicketEntity.java`](src/main/java/com/agentscustomerstickets/tickets/infra/TicketEntity.java)
-    - [`src/main/java/com/agentscustomerstickets/tickets/infra/TicketRepository.java`](src/main/java/com/agentscustomerstickets/tickets/infra/TicketRepository.java)
+    - [`users/infra/UserEntity.java`](src/main/java/com/agentscustomerstickets/users/infra/UserEntity.java)
+    - [`users/infra/UserRepository.java`](src/main/java/com/agentscustomerstickets/users/infra/UserRepository.java)
+    - [`tickets/infra/TicketEntity.java`](src/main/java/com/agentscustomerstickets/tickets/infra/TicketEntity.java)
+    - [`tickets/infra/TicketRepository.java`](src/main/java/com/agentscustomerstickets/tickets/infra/TicketRepository.java)
   - MySQL configuration:
     - [`src/main/resources/application.yml`](src/main/resources/application.yml)
     - [`docker-compose.yml`](docker-compose.yml)
@@ -91,35 +106,35 @@ Scripts are available at repo root and are intended to be run from WSL.
   | `GET` | `/api/agents` | `ADMIN` only. Lists all agent accounts. |
   | `POST` | `/api/customers` | `AGENT` can create own customers; `ADMIN` can create customers when `agentId` is provided. |
   | `GET` | `/api/customers` | `AGENT` sees customers assigned to that agent; `ADMIN` can list all or filter by `agentId`. |
-  | `POST` | `/api/tickets` | `CUSTOMER` only. Creates a ticket tied to the authenticated customer identity. |
+  | `POST` | `/api/tickets` | `CUSTOMER` only. Creates a ticket tied to the authenticated customer users. |
   | `GET` | `/api/tickets` | Role-based result set: `CUSTOMER` sees own tickets, `AGENT` sees assigned tickets, `ADMIN` can query globally and filter by `agentId` and/or `customerId`. |
   - Request DTO annotations are used across controllers, e.g.:
     - [`createCustomer`](src/main/java/com/agentscustomerstickets/customers/web/CustomersController.java#L60) in [`CustomersController`](src/main/java/com/agentscustomerstickets/customers/web/CustomersController.java)
     - [`CreateTicketRequest`](src/main/java/com/agentscustomerstickets/tickets/web/TicketsController.java#L53) in [`TicketsController`](src/main/java/com/agentscustomerstickets/tickets/web/TicketsController.java)
   - **Return correct HTTP statuses (200/400/401/403/404/409)** with **human-readable error responses**
     - Central exception-to-status mapping:
-      - [`src/main/java/com/agentscustomerstickets/shared/error/ApiExceptionHandler.java`](src/main/java/com/agentscustomerstickets/shared/error/ApiExceptionHandler.java)
-      - [`src/main/java/com/agentscustomerstickets/shared/error/ApiErrorResponse.java`](src/main/java/com/agentscustomerstickets/shared/error/ApiErrorResponse.java)
+      - [`shared/error/ApiExceptionHandler.java`](src/main/java/com/agentscustomerstickets/shared/error/ApiExceptionHandler.java)
+      - [`shared/error/ApiErrorResponse.java`](src/main/java/com/agentscustomerstickets/shared/error/ApiErrorResponse.java)
     - Custom exceptions:
-      - [`src/main/java/com/agentscustomerstickets/shared/error/ResourceNotFoundException.java`](src/main/java/com/agentscustomerstickets/shared/error/ResourceNotFoundException.java)
-      - [`src/main/java/com/agentscustomerstickets/shared/error/ConflictException.java`](src/main/java/com/agentscustomerstickets/shared/error/ConflictException.java)
+      - [`shared/error/ResourceNotFoundException.java`](src/main/java/com/agentscustomerstickets/shared/error/ResourceNotFoundException.java)
+      - [`shared/error/ConflictException.java`](src/main/java/com/agentscustomerstickets/shared/error/ConflictException.java)
     - Authentication/authorization (401/403):
-      - [`src/main/java/com/agentscustomerstickets/identity/infra/SecurityConfig.java`](src/main/java/com/agentscustomerstickets/identity/infra/SecurityConfig.java)
+      - [`users/infra/SecurityConfig.java`](src/main/java/com/agentscustomerstickets/users/infra/SecurityConfig.java)
 
 ### Role-Based Access Control (RBAC)
 
 Users can only access resources appropriate to their role.
 
-- Role enum: [`ADMIN`, `AGENT`, `CUSTOMER`](src/main/java/com/agentscustomerstickets/identity/domain/Role.java)
-- **JWT Claims**: Roles are embedded in JWT tokens in [`issueAccessToken`](src/main/java/com/agentscustomerstickets/identity/infra/NimbusJwtService.java#L27) and mapped to Spring Security authorities in [`jwtAuthConverter`](src/main/java/com/agentscustomerstickets/identity/infra/SecurityConfig.java#L70).
+- Role enum: [`ADMIN`, `AGENT`, `CUSTOMER`](src/main/java/com/agentscustomerstickets/users/api/Role.java)
+- **JWT Claims**: Roles are embedded in JWT tokens in [`issueAccessToken`](src/main/java/com/agentscustomerstickets/users/infra/NimbusJwtService.java#L27) and mapped to Spring Security authorities in [`jwtAuthConverter`](src/main/java/com/agentscustomerstickets/users/infra/SecurityConfig.java#L70).
 - Example of method-level security, using `@PreAuthorize` annotations:
-  [`src/main/java/com/agentscustomerstickets/agents/web/AgentsController.java`](src/main/java/com/agentscustomerstickets/agents/web/AgentsController.java)
+  [`agents/web/AgentsController.java`](src/main/java/com/agentscustomerstickets/agents/web/AgentsController.java)
 - Username/password authentication and JWT security flow:
   - Token issuance endpoint:
     - `POST /api/auth/token`
-    - [`src/main/java/com/agentscustomerstickets/identity/web/AuthController.java`](src/main/java/com/agentscustomerstickets/identity/web/AuthController.java)
+    - [`users/web/AuthController.java`](src/main/java/com/agentscustomerstickets/users/web/AuthController.java)
   - Authentication logic:
-    - [`src/main/java/com/agentscustomerstickets/identity/application/IdentityService.java`](src/main/java/com/agentscustomerstickets/identity/application/IdentityService.java)
+    - [`users/infra/IdentityService.java`](src/main/java/com/agentscustomerstickets/users/infra/IdentityService.java)
 
 ### Unit testing
 

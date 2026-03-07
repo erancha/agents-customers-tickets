@@ -1,8 +1,8 @@
-package com.agentscustomerstickets.identity.infra;
+package com.agentscustomerstickets.users.infra;
 
-import com.agentscustomerstickets.identity.api.CurrentUser;
-import com.agentscustomerstickets.identity.api.CurrentUserProvider;
-import com.agentscustomerstickets.identity.domain.Role;
+import com.agentscustomerstickets.users.api.CurrentUser;
+import com.agentscustomerstickets.users.api.CurrentUserProvider;
+import com.agentscustomerstickets.users.api.Role;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;

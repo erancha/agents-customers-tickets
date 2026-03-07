@@ -1,8 +1,8 @@
 package com.agentscustomerstickets.customers.application;
 
-import com.agentscustomerstickets.identity.domain.Role;
-import com.agentscustomerstickets.identity.infra.UserEntity;
-import com.agentscustomerstickets.identity.infra.UserRepository;
+import com.agentscustomerstickets.users.api.User;
+import com.agentscustomerstickets.users.api.UserDirectory;
+import com.agentscustomerstickets.users.api.Role;
 import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
 import java.util.List;
 
@@ -13,24 +13,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CustomerService {
 
-  private final UserRepository userRepository;
+  private final UserDirectory userDirectory;
 
-  CustomerService(UserRepository userRepository) {
-    this.userRepository = userRepository;
+  CustomerService(UserDirectory userDirectory) {
+    this.userDirectory = userDirectory;
   }
 
   @Transactional(readOnly = true)
-  public List<UserEntity> listCustomersForAgent(Long agentId) {
-    return userRepository.findAllByAgentId(agentId);
+  public List<User> listCustomersForAgent(Long agentId) {
+    return userDirectory.findAllByAgentId(agentId);
   }
 
   @Transactional(readOnly = true)
-  UserEntity requireCustomer(@NonNull Long customerId) {
-    UserEntity u = userRepository.findById(customerId)
+  User requireCustomer(@NonNull Long customerId) {
+    User user = userDirectory.findById(customerId)
         .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-    if (u.getRole() != Role.CUSTOMER) {
+    if (user.role() != Role.CUSTOMER) {
       throw new ResourceNotFoundException("Customer not found");
     }
-    return u;
+    return user;
   }
 }
