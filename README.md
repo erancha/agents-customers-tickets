@@ -51,8 +51,6 @@ The application service listens on `http://localhost:8080`.
 
 ## Scripts
 
-Scripts are available at repo root and are intended to be run from WSL.
-
 - `./scripts/build.sh` (builds the application and runs unit/integration tests)
 - `./scripts/deploy.sh`
 - `./scripts/smoke-test.sh` (end-to-end smoke test; run while the service is up)
