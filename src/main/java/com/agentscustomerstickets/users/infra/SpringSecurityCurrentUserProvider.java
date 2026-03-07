@@ -11,6 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 class SpringSecurityCurrentUserProvider implements CurrentUserProvider {
 
+  /**
+   * Resolves the authenticated user from Spring Security's context.
+   *
+   * Resolution order:
+   * - prefer {@link JwtPrincipal} when the custom JWT converter populated it
+   * - fallback to raw {@link Jwt} claims ({@code uid}, {@code role})
+   * Throws {@link IllegalStateException} when authentication is missing, required claims are absent, or the principal type is unsupported.
+   */
   @Override
   public CurrentUser get() {
     CurrentUser currentUser;

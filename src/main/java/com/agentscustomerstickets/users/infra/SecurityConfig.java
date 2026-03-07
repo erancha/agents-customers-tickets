@@ -33,6 +33,16 @@ import java.util.function.Function;
 @EnableConfigurationProperties(JwtProperties.class)
 class SecurityConfig {
 
+  /**
+   * Configures stateless API security for the application.
+   *
+   * Access rules:
+   * - allow token issuance at {@code POST /api/auth/token}
+   * - allow health/status endpoints ({@code GET /}, {@code GET /health}, {@code /actuator/**})
+   * - require JWT authentication for every other request
+   * The provided converter maps validated JWT claims into the application's
+   * {@link JwtAuthenticationToken} shape.
+   */
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
       Function<Jwt, JwtAuthenticationToken> jwtAuthConverter) throws Exception {
@@ -43,7 +53,7 @@ class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/auth/token").permitAll()
             .requestMatchers(HttpMethod.GET, "/", "/health").permitAll()
             .requestMatchers("/actuator/**").permitAll()
-            .anyRequest().authenticated())
+            .anyRequest().authenticated()) // require JWT authentication for every other request
         .oauth2ResourceServer(oauth -> oauth
             .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtAuthenticationConverter() {
               {
@@ -55,7 +65,6 @@ class SecurityConfig {
     return http.build();
   }
 
-  @Bean
   /**
    * Converts a validated JWT into the authentication shape used by the app.
    *
@@ -66,6 +75,7 @@ class SecurityConfig {
    * The returned token exposes a {@link JwtPrincipal} via {@code getPrincipal()}
    * so controllers/services can access typed user context instead of raw claims.
    */
+  @Bean
   Function<Jwt, JwtAuthenticationToken> jwtAuthConverter() {
     return jwt -> {
       Long uid = jwt.getClaim("uid");
