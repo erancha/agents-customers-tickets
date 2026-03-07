@@ -2,12 +2,6 @@
 
 Spring Boot backend service implemented as a modular monolith (clear internal modules, single deployable).
 
-## Architecture diagram
-
-[![Architecture diagram](docs/architecture.svg)](docs/architecture.svg)
-
-Open the SVG directly to use clickable links from each module box to the corresponding source folder.
-
 ## Modular monolith boundaries (phase 1)
 
 Users persistence internals are now encapsulated inside the `users` module:
@@ -20,6 +14,8 @@ Users persistence internals are now encapsulated inside the `users` module:
 - Infrastructure adapter inside the `users` module:
   - [`users/infra/UserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserDirectoryAdapter.java)
   - [`users/infra/UserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserManagementAdapter.java)
+
+[![Architecture diagram](docs/architecture.svg)](docs/architecture.svg)
 
 ## Prerequisites
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
   <title id="title">Agents Customers Tickets - Architecture</title>
   <desc id="desc">Modular monolith architecture with HTTP layer and four modules. Users API is a dedicated dependency row above Shared concerns, Configuration, and Persistence; only Persistence accesses MySQL. Boxes are clickable and link to source folders.</desc>
   <defs>
