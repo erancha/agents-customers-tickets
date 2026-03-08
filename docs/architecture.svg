@@ -90,8 +90,7 @@
   <path class="arrow" d="M 159.278 226.652 L 159.278 395.744" style=""/>
   <path class="arrow" d="M 439.708 225.508 L 439.708 396.887" style=""/>
   <path class="arrow" d="M 715.565 225.509 L 715.564 390.026" style="transform-box: fill-box; transform-origin: 0% -14.0407%;"/>
-  <path class="arrow" d="M 976.123 224.364 L 1007 252.795"/>
-  <path class="arrow" d="M 1021.13 350.9 L 923.341 395.223" style="transform-origin: 969.947px 376.645px;"/>
+  <path class="arrow" d="M 978.486 228.687 L 1005.5 253.618" style="transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-0.783764, -0.621059, 0.621059, -0.783764, -0.000005, -0.000012)"/>
   <path class="arrow" d="M 942.399 559.882 L 942.847 492.878" style="transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-1, 0, 0, -1, 0.000019, -0.00005)"/>
   <path class="arrow" d="M 962.619 223.708 L 792.78 393.825" style="stroke-width: 2.3; transform-origin: 891.582px 246.437px;"/>
   <path class="arrow" d="M 173.001 230.082 L 946.063 312.262" style=""/>
