@@ -1,4 +1,16 @@
+x-shared-db-env: &shared-db-env
+  DB_URL: jdbc:mysql://mysql:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+  DB_USERNAME: agentscustomerstickets
+  DB_PASSWORD: agentscustomerstickets123
+
+x-shared-integration-env: &shared-integration-env
+  USERS_INTEGRATION_INTERNAL_API_KEY: ${USERS_INTEGRATION_INTERNAL_API_KEY:-internal-users-key}
+
+x-shared-runtime-env: &shared-runtime-env
+  SPRING_PROFILES_ACTIVE: docker
+
 services:
+
   mysql:
     image: mysql:8.4
     environment:
@@ -27,12 +39,8 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-      DB_USERNAME: agentscustomerstickets
-      DB_PASSWORD: agentscustomerstickets123
+      <<: [*shared-db-env, *shared-integration-env, *shared-runtime-env]
       USERS_INTEGRATION_MODE: ${USERS_INTEGRATION_MODE:-embedded}
-      USERS_INTEGRATION_BASE_URL: ${USERS_INTEGRATION_BASE_URL:-http://users-service:8080}
-      USERS_INTEGRATION_INTERNAL_API_KEY: ${USERS_INTEGRATION_INTERNAL_API_KEY:-internal-users-key}
     ports:
       - "${APP_PORT:-8080}:8080"
 
@@ -47,13 +55,11 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-      DB_USERNAME: agentscustomerstickets
-      DB_PASSWORD: agentscustomerstickets123
+      <<: [*shared-db-env, *shared-integration-env, *shared-runtime-env]
       USERS_INTEGRATION_MODE: embedded
-      USERS_INTEGRATION_INTERNAL_API_KEY: ${USERS_INTEGRATION_INTERNAL_API_KEY:-internal-users-key}
     ports:
       - "${USERS_SERVICE_PORT:-8081}:8080"
 
 volumes:
+  # Persist MySQL data across container recreation.
   mysql_data:

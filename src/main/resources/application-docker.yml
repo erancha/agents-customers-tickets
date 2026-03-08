@@ -1,0 +1,3 @@
+users:
+  integration:
+    base-url: http://users-service:8080

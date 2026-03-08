@@ -32,7 +32,7 @@ See [Appendix: Phase 2 Users Internal Microservice](#appendix-phase-2-users-inte
 docker compose up -d mysql
 
 # Build the application
-./scripts/build.sh # (--help).
+./scripts/build.sh # --run, --help
 
 # Run the application service
 java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar

@@ -30,11 +30,14 @@ class ApiExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
-    StringBuilder sb = new StringBuilder("Validation failed");
-    for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
-      sb.append("; ").append(fe.getField()).append(": ").append(fe.getDefaultMessage());
+    if (log.isDebugEnabled()) {
+      StringBuilder sb = new StringBuilder("Validation failed");
+      for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
+        sb.append("; ").append(fe.getField()).append(": ").append(fe.getDefaultMessage());
+      }
+      log.debug("Validation failed: method={} path={} details={}", req.getMethod(), req.getRequestURI(), sb);
     }
-    return error(HttpStatus.BAD_REQUEST, sb.toString(), req);
+    return error(HttpStatus.BAD_REQUEST, req);
   }
 
   @ExceptionHandler(AuthenticationException.class)
@@ -42,7 +45,7 @@ class ApiExceptionHandler {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     log.info("Authentication failed: method={} path={} user={} authorities={} reason={}",
         req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
-    return error(HttpStatus.UNAUTHORIZED, "Unauthorized", req);
+    return error(HttpStatus.UNAUTHORIZED, req);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
@@ -50,28 +53,22 @@ class ApiExceptionHandler {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     log.info("Authorization denied: method={} path={} user={} authorities={} reason={}",
         req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
-    return error(HttpStatus.FORBIDDEN, "Forbidden", req);
+    return error(HttpStatus.FORBIDDEN, req);
   }
 
   @ExceptionHandler({ ResourceNotFoundException.class, NoResourceFoundException.class })
   ResponseEntity<ApiErrorResponse> handleNotFound(Exception ex, HttpServletRequest req) {
-    return error(HttpStatus.NOT_FOUND, ex.getMessage(), req);
+    return error(HttpStatus.NOT_FOUND, req);
   }
 
-  @ExceptionHandler(ConflictException.class)
-  ResponseEntity<ApiErrorResponse> handleConflict(ConflictException ex, HttpServletRequest req) {
-    return error(HttpStatus.CONFLICT, ex.getMessage(), req);
-  }
-
-  @ExceptionHandler(DataIntegrityViolationException.class)
-  ResponseEntity<ApiErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
-      HttpServletRequest req) {
-    return error(HttpStatus.CONFLICT, "Conflict", req);
+  @ExceptionHandler({ ConflictException.class, DataIntegrityViolationException.class })
+  ResponseEntity<ApiErrorResponse> handleConflict(Exception ex, HttpServletRequest req) {
+    return error(HttpStatus.CONFLICT, req);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   ResponseEntity<ApiErrorResponse> handleBadRequest(IllegalArgumentException ex, HttpServletRequest req) {
-    return error(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
+    return error(HttpStatus.BAD_REQUEST, req);
   }
 
   // Database availability handlers - matched by specificity, not order
@@ -80,16 +77,14 @@ class ApiExceptionHandler {
   @ExceptionHandler({ CannotCreateTransactionException.class, DataAccessResourceFailureException.class })
   ResponseEntity<ApiErrorResponse> handleDatabaseUnavailable(Exception ex, HttpServletRequest req) {
     log.warn("Database unavailable: {}", ex.getClass().getSimpleName());
-    return error(HttpStatus.SERVICE_UNAVAILABLE,
-        "Database service temporarily unavailable. Please retry after a moment.", req);
+    return error(HttpStatus.SERVICE_UNAVAILABLE, req);
   }
 
   @ExceptionHandler(TransientDataAccessException.class)
   ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex,
       HttpServletRequest req) {
     log.warn("Transient database error (may be temporary): {}", ex.getMessage());
-    return error(HttpStatus.SERVICE_UNAVAILABLE,
-        "Database service temporarily unavailable. Please retry after a moment.", req);
+    return error(HttpStatus.SERVICE_UNAVAILABLE, req);
   }
 
   @ExceptionHandler(JpaSystemException.class)
@@ -97,11 +92,10 @@ class ApiExceptionHandler {
     log.warn("JPA system error: {}", ex.getMessage());
     // Check if the root cause is a database connectivity issue
     if (isCausedByDatabaseUnavailability(ex)) {
-      return error(HttpStatus.SERVICE_UNAVAILABLE,
-          "Database service temporarily unavailable. Please retry after a moment.", req);
+      return error(HttpStatus.SERVICE_UNAVAILABLE, req);
     }
     // If not a connection issue, treat as internal server error
-    return error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getClass().getSimpleName() + ": " + ex.getMessage(), req);
+    return error(HttpStatus.INTERNAL_SERVER_ERROR, req);
   }
 
   /**
@@ -129,22 +123,14 @@ class ApiExceptionHandler {
   @ExceptionHandler(Exception.class)
   ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest req) {
     log.error("Unhandled exception", ex);
-    String msg = ex.getMessage();
-    if (msg == null || msg.isBlank()) {
-      msg = ex.getClass().getSimpleName();
-    } else {
-      msg = ex.getClass().getSimpleName() + ": " + msg;
-    }
-    return error(HttpStatus.INTERNAL_SERVER_ERROR, msg, req);
+    return error(HttpStatus.INTERNAL_SERVER_ERROR, req);
   }
 
-  private ResponseEntity<ApiErrorResponse> error(HttpStatus status, String message, HttpServletRequest req) {
+  private ResponseEntity<ApiErrorResponse> error(HttpStatus status, HttpServletRequest req) {
     ApiErrorResponse body = new ApiErrorResponse(
         Instant.now(),
         status.value(),
-        status.getReasonPhrase(),
-        message,
-        req.getRequestURI());
+        status.getReasonPhrase());
     return ResponseEntity.status(status).body(body);
   }
 
