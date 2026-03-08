@@ -1,12 +1,10 @@
 package com.agentscustomerstickets.users.web;
 
+import com.agentscustomerstickets.users.application.UserProfileService;
 import com.agentscustomerstickets.users.api.CurrentUser;
 import com.agentscustomerstickets.users.api.CurrentUserProvider;
 import com.agentscustomerstickets.users.api.User;
-import com.agentscustomerstickets.users.api.UserDirectory;
-import com.agentscustomerstickets.users.api.UserManagement;
 import com.agentscustomerstickets.users.api.Role;
-import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,15 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 class MeController {
 
   private final CurrentUserProvider currentUserProvider;
-  private final UserDirectory userDirectory;
-  private final UserManagement userManagement;
+  private final UserProfileService userProfileService;
 
-  MeController(CurrentUserProvider currentUserProvider,
-      UserDirectory userDirectory,
-      UserManagement userManagement) {
+  MeController(CurrentUserProvider currentUserProvider, UserProfileService userProfileService) {
     this.currentUserProvider = currentUserProvider;
-    this.userDirectory = userDirectory;
-    this.userManagement = userManagement;
+    this.userProfileService = userProfileService;
   }
 
   record MeResponse(Long id, String username, Role role, String fullName, String email) {
@@ -51,8 +45,7 @@ class MeController {
   @GetMapping
   ResponseEntity<MeResponse> me() {
     CurrentUser cu = currentUserProvider.get();
-    User user = userDirectory.findById(cu.id())
-        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    User user = userProfileService.getUser(cu.id());
     return ResponseEntity.ok(MeResponse.from(user));
   }
 
@@ -60,7 +53,7 @@ class MeController {
   @PreAuthorize("hasAnyRole('AGENT','CUSTOMER','ADMIN')")
   ResponseEntity<MeResponse> updateMe(@Valid @RequestBody UpdateMeRequest req) {
     CurrentUser cu = currentUserProvider.get();
-    User user = userManagement.updateProfile(cu.id(), req.fullName(), req.email());
+    User user = userProfileService.updateProfile(cu.id(), req.fullName(), req.email());
     return ResponseEntity.ok(MeResponse.from(user));
   }
 }

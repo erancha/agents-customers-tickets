@@ -4,8 +4,6 @@ import com.agentscustomerstickets.customers.application.CustomerService;
 import com.agentscustomerstickets.users.api.CurrentUser;
 import com.agentscustomerstickets.users.api.CurrentUserProvider;
 import com.agentscustomerstickets.users.api.User;
-import com.agentscustomerstickets.users.api.UserDirectory;
-import com.agentscustomerstickets.users.api.UserManagement;
 import com.agentscustomerstickets.users.api.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -29,17 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 class CustomersController {
 
   private final CurrentUserProvider currentUserProvider;
-  private final UserDirectory userDirectory;
-  private final UserManagement userManagement;
   private final CustomerService customerService;
 
-  CustomersController(CurrentUserProvider currentUserProvider,
-      UserDirectory userDirectory,
-      UserManagement userManagement,
-      CustomerService customerService) {
+  CustomersController(CurrentUserProvider currentUserProvider, CustomerService customerService) {
     this.currentUserProvider = currentUserProvider;
-    this.userDirectory = userDirectory;
-    this.userManagement = userManagement;
     this.customerService = customerService;
   }
 
@@ -71,8 +62,7 @@ class CustomersController {
       agentId = cu.id();
     }
 
-    User created = userManagement.createUser(req.username(), req.password(), Role.CUSTOMER, agentId, req.fullName(),
-        req.email());
+    User created = customerService.createCustomer(req.username(), req.password(), agentId, req.fullName(), req.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(CustomerResponse.from(created));
   }
 
@@ -85,7 +75,7 @@ class CustomersController {
     Long effectiveAgentId;
     if (cu.role() == Role.ADMIN) {
       if (agentId == null) {
-        List<User> customers = userDirectory.findAllByRole(Role.CUSTOMER);
+        List<User> customers = customerService.listAllCustomers();
         return ResponseEntity.ok(customers.stream().map(CustomerResponse::from).toList());
       }
       effectiveAgentId = agentId;
