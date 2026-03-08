@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerService {
@@ -19,12 +18,10 @@ public class CustomerService {
     this.userDirectory = userDirectory;
   }
 
-  @Transactional(readOnly = true)
   public List<User> listCustomersForAgent(Long agentId) {
     return userDirectory.findAllByAgentId(agentId);
   }
 
-  @Transactional(readOnly = true)
   User requireCustomer(@NonNull Long customerId) {
     User user = userDirectory.findById(customerId)
         .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));

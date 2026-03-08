@@ -1,8 +1,7 @@
 package com.agentscustomerstickets.agents.web;
 
+import com.agentscustomerstickets.agents.application.AgentsService;
 import com.agentscustomerstickets.users.api.User;
-import com.agentscustomerstickets.users.api.UserDirectory;
-import com.agentscustomerstickets.users.api.UserManagement;
 import com.agentscustomerstickets.users.api.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -24,12 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 class AgentsController {
 
-  private final UserDirectory userDirectory;
-  private final UserManagement userManagement;
+  private final AgentsService agentsService;
 
-  AgentsController(UserDirectory userDirectory, UserManagement userManagement) {
-    this.userDirectory = userDirectory;
-    this.userManagement = userManagement;
+  AgentsController(AgentsService agentsService) {
+    this.agentsService = agentsService;
   }
 
   record CreateAgentRequest(
@@ -48,16 +45,14 @@ class AgentsController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   ResponseEntity<AgentResponse> createAgent(@Valid @RequestBody CreateAgentRequest req) {
-    User created = userManagement.createUser(req.username(), req.password(), Role.AGENT, null,
-        req.fullName(),
-        req.email());
+    User created = agentsService.createAgent(req.username(), req.password(), req.fullName(), req.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(AgentResponse.from(created));
   }
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   ResponseEntity<List<AgentResponse>> listAgents() {
-    List<User> agents = userDirectory.findAllByRole(Role.AGENT);
+    List<User> agents = agentsService.listAgents();
     return ResponseEntity.ok(agents.stream().map(AgentResponse::from).toList());
   }
 }
