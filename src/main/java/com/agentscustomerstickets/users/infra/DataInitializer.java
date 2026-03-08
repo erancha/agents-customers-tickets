@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 class DataInitializer {
 
   @Bean
+  // CommandLineRunner is fine for lightweight bootstrap, especially in dev/test, 
+  // but for production-critical initialization, migrations (e.g. Flyway) + externalized secrets should be used.
   CommandLineRunner initDefaultAdmin(UsersService usersService, UserRepository userRepository) {
     return args -> {
       if (!userRepository.existsByUsername("admin")) {
