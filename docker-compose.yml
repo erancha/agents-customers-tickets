@@ -13,6 +13,12 @@ services:
 
   mysql:
     image: mysql:8.4
+    command:
+      - --server-id=1
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --binlog-row-image=FULL
+      - --binlog-expire-logs-seconds=86400
     environment:
       MYSQL_DATABASE: agentscustomerstickets_db
       MYSQL_USER: agentscustomerstickets
@@ -28,6 +34,65 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  redpanda:
+    profiles: ["cdc"]
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --reserve-memory
+      - 0M
+      - --check=false
+      - --node-id
+      - "0"
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr
+      - internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr
+      - internal://redpanda:8082,external://localhost:18082
+      - --rpc-addr
+      - redpanda:33145
+      - --advertise-rpc-addr
+      - redpanda:33145
+    ports:
+      - "19092:19092"
+      - "18082:18082"
+      - "19644:9644"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+
+  redpanda-console:
+    profiles: ["cdc"]
+    image: docker.redpanda.com/redpandadata/console:v2.8.4
+    depends_on:
+      - redpanda
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+      REDPANDA_ADMINAPI_ENABLED: "true"
+      REDPANDA_ADMINAPI_URLS: http://redpanda:9644
+    ports:
+      - "8089:8080"
+
+  debezium:
+    profiles: ["cdc"]
+    image: quay.io/debezium/server:3.1
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
+    volumes:
+      - ./config/debezium/application.properties:/debezium/config/application.properties:ro
+      - debezium_data:/debezium/data
 
   app:
     build:
@@ -61,5 +126,6 @@ services:
       - "${USERS_SERVICE_PORT:-8081}:8080"
 
 volumes:
-  # Persist MySQL data across container recreation.
-  mysql_data:
+  mysql_data: # Persist MySQL data between restarts.
+  debezium_data: # Persist Debezium offsets between restarts.
+  redpanda_data: # Persist Redpanda data between restarts.

@@ -154,3 +154,32 @@ This means controllers in other modules do not change between phases; only runti
 # Start MySQL + app + dedicated users-service container
 USERS_INTEGRATION_MODE=remote docker compose --profile users-ms up -d --build
 ```
+
+### CDC (MySQL Create/Modify/Delete to Kafka)
+
+`docker-compose.yml` enables MySQL row-based binary logging and runs Debezium Server (profile `cdc`) to publish CDC events to Kafka.
+
+The `cdc` profile now includes a local Redpanda broker and Redpanda Console.
+
+Run with CDC enabled:
+
+```bash
+docker compose --profile cdc up -d
+docker compose logs -f debezium
+```
+
+Local endpoints:
+
+- Kafka broker: `localhost:19092`
+- Redpanda Console: `http://localhost:8089`
+
+Debezium target broker defaults to `redpanda:9092` (in-network). You can still override at runtime:
+
+```bash
+KAFKA_BOOTSTRAP_SERVERS=<host:port> docker compose --profile cdc up -d
+```
+
+Topic naming uses Debezium prefix + database + table. With current config (`debezium.source.topic.prefix=my`), examples are:
+
+- `my.agentscustomerstickets_db.users`
+- `my.agentscustomerstickets_db.tickets`
