@@ -258,6 +258,9 @@ main() {
   local agent_token
   agent_token=$(get_token "$agent_username" "$DEMO_AGENT_PASSWORD")
 
+  # step "Failing to create an agent by the first agent..."
+  # create_agent "$agent_token" "aaa$agent_username" "aaa$agent_email"
+
   step "Listing agents (admin token required)..."
   json_get "$BASE_URL/api/agents" "$admin_token"
   echo

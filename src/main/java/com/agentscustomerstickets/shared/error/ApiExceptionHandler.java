@@ -12,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,11 +39,17 @@ class ApiExceptionHandler {
 
   @ExceptionHandler(AuthenticationException.class)
   ResponseEntity<ApiErrorResponse> handleAuth(AuthenticationException ex, HttpServletRequest req) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    log.info("Authentication failed: method={} path={} user={} authorities={} reason={}",
+        req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
     return error(HttpStatus.UNAUTHORIZED, "Unauthorized", req);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   ResponseEntity<ApiErrorResponse> handleDenied(AccessDeniedException ex, HttpServletRequest req) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    log.info("Authorization denied: method={} path={} user={} authorities={} reason={}",
+        req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
     return error(HttpStatus.FORBIDDEN, "Forbidden", req);
   }
 
@@ -137,5 +146,19 @@ class ApiExceptionHandler {
         message,
         req.getRequestURI());
     return ResponseEntity.status(status).body(body);
+  }
+
+  private static String principalName(Authentication auth) {
+    if (auth == null) {
+      return "anonymous";
+    }
+    return auth.getName();
+  }
+
+  private static String authorityNames(Authentication auth) {
+    if (auth == null || auth.getAuthorities() == null) {
+      return "[]";
+    }
+    return auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().toString();
   }
 }
