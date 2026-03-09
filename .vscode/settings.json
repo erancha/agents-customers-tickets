@@ -1,5 +1,8 @@
 {
-  "cSpell.words": ["agentscustomerstickets"],
+  "cSpell.words": [
+    "agentscustomerstickets",
+    "stompjs"
+  ],
   "java.compile.nullAnalysis.mode": "automatic",
   "java.configuration.updateBuildConfiguration": "interactive"
 }

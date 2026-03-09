@@ -1,5 +1,6 @@
 package com.agentscustomerstickets.agents.application;
 
+import com.agentscustomerstickets.admin.events.application.AdminEventsPublisher;
 import com.agentscustomerstickets.users.api.Role;
 import com.agentscustomerstickets.users.api.User;
 import com.agentscustomerstickets.users.api.UserDirectory;
@@ -12,14 +13,21 @@ public class AgentsService {
 
    private final UserDirectory userDirectory;
    private final UserManagement userManagement;
+   private final AdminEventsPublisher adminEventsPublisher;
 
-   AgentsService(UserDirectory userDirectory, UserManagement userManagement) {
+   AgentsService(
+         UserDirectory userDirectory,
+         UserManagement userManagement,
+         AdminEventsPublisher adminEventsPublisher) {
       this.userDirectory = userDirectory;
       this.userManagement = userManagement;
+      this.adminEventsPublisher = adminEventsPublisher;
    }
 
    public User createAgent(String username, String password, String fullName, String email) {
-      return userManagement.createUser(username, password, Role.AGENT, null, fullName, email);
+      User created = userManagement.createUser(username, password, Role.AGENT, null, fullName, email);
+      adminEventsPublisher.publishAgentCreated(created);
+      return created;
    }
 
    public List<User> listAgents() {

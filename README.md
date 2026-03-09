@@ -54,6 +54,7 @@ The application service listens on `http://localhost:8080`.
 - `./scripts/build.sh` (builds the application and runs unit/integration tests)
 - `./scripts/deploy.sh`
 - `./scripts/smoke-test.sh` (end-to-end smoke test; run while the service is up)
+- `./scripts/websocket-test.sh` (connects as admin to websocket and prints pushed admin events)
 - `./scripts/undeploy.sh`
 - `./scripts/clean.sh`
 
@@ -86,6 +87,7 @@ The application service listens on `http://localhost:8080`.
   | `GET` | `/api/customers` | `AGENT` sees customers assigned to that agent; `ADMIN` can list all or filter by `agentId`. |
   | `POST` | `/api/tickets` | `CUSTOMER` only. Creates a ticket tied to the authenticated customer users. |
   | `GET` | `/api/tickets` | Role-based result set: `CUSTOMER` sees own tickets, `AGENT` sees assigned tickets, `ADMIN` can query globally and filter by `agentId` and/or `customerId`. |
+  | `WS (STOMP)` | `/ws/admin-events` | `ADMIN` only (JWT Bearer in `CONNECT` headers). Subscribe to `/topic/admin/events` for admin push events. |
   - Request DTO annotations are used across controllers, e.g.:
     - [`createCustomer`](src/main/java/com/agentscustomerstickets/customers/web/CustomersController.java#L60) in [`CustomersController`](src/main/java/com/agentscustomerstickets/customers/web/CustomersController.java)
     - [`CreateTicketRequest`](src/main/java/com/agentscustomerstickets/tickets/web/TicketsController.java#L53) in [`TicketsController`](src/main/java/com/agentscustomerstickets/tickets/web/TicketsController.java)
@@ -113,6 +115,25 @@ Users can only access resources appropriate to their role.
     - [`users/web/AuthController.java`](src/main/java/com/agentscustomerstickets/users/web/AuthController.java)
   - Authentication logic:
     - [`users/infra/UsersService.java`](src/main/java/com/agentscustomerstickets/users/infra/UsersService.java)
+
+### Admin websocket events
+
+- Endpoint: `/ws/admin-events` (STOMP over WebSocket)
+- Topic: `/topic/admin/events`
+- Security: JWT Bearer token is required in STOMP `CONNECT` headers; only `ADMIN` can connect/subscribe.
+- Initial published events:
+  - `AGENT_CREATED`
+  - `CUSTOMER_CREATED`
+- Main components:
+  - [`admin/events/web/AdminEventsWebSocketConfig.java`](src/main/java/com/agentscustomerstickets/admin/events/web/AdminEventsWebSocketConfig.java)
+  - [`admin/events/web/AdminEventsWebSocketAuthInterceptor.java`](src/main/java/com/agentscustomerstickets/admin/events/web/AdminEventsWebSocketAuthInterceptor.java)
+  - [`admin/events/application/AdminEventsPublisher.java`](src/main/java/com/agentscustomerstickets/admin/events/application/AdminEventsPublisher.java)
+
+Quick local check:
+
+```bash
+./scripts/websocket-test.sh
+```
 
 ### Unit testing
 
@@ -159,7 +180,7 @@ USERS_INTEGRATION_MODE=remote docker compose --profile users-ms up -d --build
 
 `docker-compose.yml` enables MySQL row-based binary logging and runs Debezium Server (profile `cdc`) to publish CDC events to Kafka.
 
-The `cdc` profile now includes a local Redpanda broker and Redpanda Console.
+The `cdc` profile includes a local Redpanda broker and Redpanda Console.
 
 Run with CDC enabled:
 
@@ -173,7 +194,8 @@ Local endpoints:
 - Kafka broker: `localhost:19092`
 - Redpanda Console: `http://localhost:8089`
 
-Debezium target broker defaults to `redpanda:9092` (in-network). You can still override at runtime:
+Debezium target broker defaults to `redpanda:9092`.
+This can be overridden at runtime:
 
 ```bash
 KAFKA_BOOTSTRAP_SERVERS=<host:port> docker compose --profile cdc up -d
