@@ -180,13 +180,30 @@ USERS_INTEGRATION_MODE=remote docker compose --profile users-ms up -d --build
 
 `docker-compose.yml` enables MySQL row-based binary logging and runs Debezium Server (profile `cdc`) to publish CDC events to Kafka.
 
+The admin Kafka consumer that republishes each consumed CDC message to `/topic/admin/events` is controlled by Spring profile `cdc` (runtime), not by Maven build profiles.
+
 The `cdc` profile includes a local Redpanda broker and Redpanda Console.
+
+When running in Docker Compose, the app Kafka consumer uses `KAFKA_BOOTSTRAP_SERVERS=redpanda:9092` (container network).
+When running the JAR locally, the default remains `localhost:19092`.
 
 Run with CDC enabled:
 
 ```bash
-docker compose --profile cdc up -d
+SPRING_PROFILES_ACTIVE=docker,cdc docker compose --profile cdc up -d
 docker compose logs -f debezium
+```
+
+If you run the JAR directly instead of Compose, enable profile `cdc` the same way:
+
+```bash
+SPRING_PROFILES_ACTIVE=cdc java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
+```
+
+If you run via the build script, `--run` does not add `cdc` automatically, so pass it through the environment:
+
+```bash
+SPRING_PROFILES_ACTIVE=cdc ./scripts/build.sh --run
 ```
 
 Local endpoints:

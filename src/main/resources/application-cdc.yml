@@ -1,0 +1,13 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:19092}
+    consumer:
+      group-id: ${ADMIN_EVENTS_CDC_GROUP_ID:admin-events-cdc}
+      auto-offset-reset: ${ADMIN_EVENTS_CDC_OFFSET_RESET:earliest}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+admin:
+  events:
+    kafka:
+      topic-pattern: ${ADMIN_EVENTS_CDC_TOPIC_PATTERN:my.agentscustomerstickets_db.*}
