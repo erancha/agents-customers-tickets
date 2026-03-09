@@ -4,6 +4,7 @@ import com.agentscustomerstickets.users.application.PasswordHasher;
 import com.agentscustomerstickets.users.api.User;
 import com.agentscustomerstickets.users.api.Role;
 import com.agentscustomerstickets.shared.error.ConflictException;
+import com.agentscustomerstickets.shared.error.InvalidCredentialsException;
 import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -49,10 +50,10 @@ public class UsersService {
    @Transactional(readOnly = true)
    public User authenticate(String username, String rawPassword) {
       UserEntity user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+            .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
       if (!passwordHasher.matches(rawPassword, user.getPasswordHash())) {
-         throw new IllegalArgumentException("Invalid username or password");
+         throw new InvalidCredentialsException("Invalid username or password");
       }
       return new User(
             user.getId(),

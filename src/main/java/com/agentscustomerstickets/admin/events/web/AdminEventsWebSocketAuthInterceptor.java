@@ -12,6 +12,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.lang.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Component;
 @Component
 class AdminEventsWebSocketAuthInterceptor implements ChannelInterceptor {
 
+   private static final Logger log = LoggerFactory.getLogger(AdminEventsWebSocketAuthInterceptor.class);
    private static final String ADMIN_ROLE = "ROLE_" + Role.ADMIN.name();
 
    private final JwtDecoder jwtDecoder;
@@ -54,22 +57,35 @@ class AdminEventsWebSocketAuthInterceptor implements ChannelInterceptor {
          return message;
       }
 
-      if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-         Authentication authentication = authenticate(accessor);
-         assertAdmin(authentication);
-         accessor.setUser(authentication);
-         return message;
-      }
-
-      if (StompCommand.SUBSCRIBE.equals(accessor.getCommand()) || StompCommand.SEND.equals(accessor.getCommand())) {
-         Principal user = accessor.getUser();
-         if (!(user instanceof Authentication authentication)) {
-            throw new InsufficientAuthenticationException("Authentication is required");
+      try {
+         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            Authentication authentication = authenticate(accessor);
+            assertAdmin(authentication);
+            accessor.setUser(authentication);
+            return message;
          }
-         assertAdmin(authentication);
+
+         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand()) || StompCommand.SEND.equals(accessor.getCommand())) {
+            Principal user = accessor.getUser();
+            if (!(user instanceof Authentication authentication)) {
+               throw new InsufficientAuthenticationException("Authentication is required");
+            }
+            assertAdmin(authentication);
+         }
+      } catch (InsufficientAuthenticationException | AccessDeniedException ex) {
+         log.info("WebSocket access denied: command={} destination={} user={} reason={}",
+               accessor.getCommand(), accessor.getDestination(), principalName(accessor.getUser()), ex.getMessage());
+         throw ex;
       }
 
       return message;
+   }
+
+   private static String principalName(Principal principal) {
+      if (principal == null) {
+         return "anonymous";
+      }
+      return principal.getName();
    }
 
    private Authentication authenticate(StompHeaderAccessor accessor) {

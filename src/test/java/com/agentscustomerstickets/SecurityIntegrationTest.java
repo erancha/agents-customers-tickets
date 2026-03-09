@@ -30,6 +30,14 @@ class SecurityIntegrationTest {
         }
 
         @Test
+        void invalidCredentialsReturnUnauthorized() throws Exception {
+                mockMvc.perform(post("/api/auth/token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"admin\",\"password\":\"wrong-password\"}"))
+                                .andExpect(status().isUnauthorized());
+        }
+
+        @Test
         void nonAdminCannotCreateAgent() throws Exception {
                 String tokenBody = mockMvc.perform(post("/api/auth/token")
                                 .contentType(MediaType.APPLICATION_JSON)

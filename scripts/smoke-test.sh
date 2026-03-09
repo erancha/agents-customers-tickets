@@ -253,13 +253,15 @@ main() {
   local agent_id
   agent_id=$(create_agent "$admin_token" "$agent_username" "$agent_email")
   echo "Agent id: $agent_id"
+  echo "Agent username: $agent_username"
+  echo "Agent password: $DEMO_AGENT_PASSWORD"
 
   step "Getting agent JWT..."
   local agent_token
   agent_token=$(get_token "$agent_username" "$DEMO_AGENT_PASSWORD")
 
   # step "Failing to create an agent by the first agent..."
-  # create_agent "$agent_token" "aaa$agent_username" "aaa$agent_email"
+  # create_agent "$agent_token" "dontcare_username" "dontcare_email"
 
   step "Listing agents (admin token required)..."
   json_get "$BASE_URL/api/agents" "$admin_token"

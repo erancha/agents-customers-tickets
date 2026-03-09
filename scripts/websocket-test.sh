@@ -113,7 +113,7 @@ main() {
           Authorization: `Bearer ${token}`,
         },
         webSocketFactory: () => new WebSocket(wsUrl),
-        reconnectDelay: 3000,
+        reconnectDelay: 0,
         heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
         onConnect: () => {
@@ -134,9 +134,11 @@ main() {
           if (frame.body) {
             console.error(frame.body);
           }
+          client.deactivate().finally(() => process.exit(1));
         },
         onWebSocketError: (event) => {
           console.error("[websocket-error]", event && event.message ? event.message : event);
+          client.deactivate().finally(() => process.exit(1));
         },
       });
 

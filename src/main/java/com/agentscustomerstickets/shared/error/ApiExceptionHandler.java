@@ -40,8 +40,8 @@ class ApiExceptionHandler {
     return error(HttpStatus.BAD_REQUEST, req);
   }
 
-  @ExceptionHandler(AuthenticationException.class)
-  ResponseEntity<ApiErrorResponse> handleAuth(AuthenticationException ex, HttpServletRequest req) {
+  @ExceptionHandler({ AuthenticationException.class, InvalidCredentialsException.class })
+  ResponseEntity<ApiErrorResponse> handleAuth(Exception ex, HttpServletRequest req) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     log.info("Authentication failed: method={} path={} user={} authorities={} reason={}",
         req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
