@@ -17,7 +17,7 @@ Users persistence internals are now encapsulated inside the `users` module:
 
 [![Architecture diagram](docs/architecture.svg)](docs/architecture.svg)
 
-See [Appendix: Phase 2 Users Internal Microservice](#appendix-phase-2-users-internal-microservice) for architecture details, file mapping, and phase-2 run commands.
+See [Appendix: Phase 2 Users Internal Microservice](#appendix-phase-2-users-internal-microservice) which extends phase 1 by allowing to run users capabilities in a separate `users-service` process while keeping the modular monolith boundaries and API contracts intact.
 
 ## Prerequisites
 
@@ -58,7 +58,7 @@ The application service listens on `http://localhost:8080`.
 - `./scripts/undeploy.sh`
 - `./scripts/clean.sh`
 
-## Exercise requirements mapping
+## Requirements mapping
 
 ### General
 
@@ -116,6 +116,18 @@ Users can only access resources appropriate to their role.
   - Authentication logic:
     - [`users/infra/UsersService.java`](src/main/java/com/agentscustomerstickets/users/infra/UsersService.java)
 
+### Unit testing
+
+- Unit tests to **some services** : [`src/test/java/com/agentscustomerstickets/customer/application/CustomerServiceTest.java`](src/test/java/com/agentscustomerstickets/customers/application/CustomerServiceTest.java)
+
+- At least 1 **security-aware** unit test : `meRequiresAuthentication` in [`src/test/java/com/agentscustomerstickets/SecurityIntegrationTest.java`](src/test/java/com/agentscustomerstickets/SecurityIntegrationTest.java)
+
+### Deliverables
+
+- **[`README.md`](README.md)** (the current file) describing the project and how to build and run
+- **[`Dockerfile`](Dockerfile)** for the application service
+- **[`docker-compose.yml`](docker-compose.yml)** for local orchestration (MySQL + application service)
+
 ### Admin websocket events
 
 - Endpoint: `/ws/admin-events` (STOMP over WebSocket)
@@ -135,57 +147,18 @@ Quick local check:
 ./scripts/websocket-test.sh
 ```
 
-### Unit testing
-
-- Unit tests to **some services** : [`src/test/java/com/agentscustomerstickets/customer/application/CustomerServiceTest.java`](src/test/java/com/agentscustomerstickets/customers/application/CustomerServiceTest.java)
-
-- At least 1 **security-aware** unit test : `meRequiresAuthentication` in [`src/test/java/com/agentscustomerstickets/SecurityIntegrationTest.java`](src/test/java/com/agentscustomerstickets/SecurityIntegrationTest.java)
-
-### Deliverables
-
-- **[`README.md`](README.md)** (the current file) describing the project and how to build and run
-- **[`Dockerfile`](Dockerfile)** for the application service
-- **[`docker-compose.yml`](docker-compose.yml)** for local orchestration (MySQL + application service)
-
-## Appendix: Phase 2 Users Internal Microservice
-
-Phase 2 keeps the same public module contracts (`users.api`) but allows runtime indirection for users operations:
-
-- **Local execution (embedded)**: modules call users behavior in-process through:
-  - [`users/infra/UserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserDirectoryAdapter.java)
-  - [`users/infra/UserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserManagementAdapter.java)
-- **Remote execution (users as internal microservice)**: modules still depend on the same `users.api` interfaces, but Spring wires REST-backed adapters:
-  - [`users/infra/remote/RemoteUsersClientConfig.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUsersClientConfig.java)
-  - [`users/infra/remote/RemoteUserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUserDirectoryAdapter.java)
-  - [`users/infra/remote/RemoteUserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUserManagementAdapter.java)
-  - Internal endpoints are exposed by [`users/infra/remote/InternalUsersController.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/InternalUsersController.java).
-
-This means controllers in other modules do not change between phases; only runtime wiring changes through configuration.
-
-### Development
-
-```bash
-# Build the app in phase 2 mode
-./scripts/build.sh --users-ms
-```
-
-### Deployment
-
-```bash
-# Start MySQL + app + dedicated users-service container
-USERS_INTEGRATION_MODE=remote docker compose --profile users-ms up -d --build
-```
-
 ### CDC (MySQL Create/Modify/Delete to Kafka)
 
 `docker-compose.yml` enables MySQL row-based binary logging and runs Debezium Server (profile `cdc`) to publish CDC events to Kafka.
 
-The admin Kafka consumer that republishes each consumed CDC message to `/topic/admin/events` is controlled by Spring profile `cdc` (runtime), not by Maven build profiles.
+The admin Kafka consumer that republishes each consumed CDC message to `/topic/admin/events` (see [Admin websocket events](#admin-websocket-events)) is controlled by Spring profile `cdc` (runtime), not by Maven build profiles.
 
 The `cdc` profile includes a local Redpanda broker and Redpanda Console.
 
 When running in Docker Compose, the app Kafka consumer uses `KAFKA_BOOTSTRAP_SERVERS=redpanda:9092` (container network).
 When running the JAR locally, the default remains `localhost:19092`.
+
+For topic-pattern subscriptions, the consumer metadata refresh is set to 10s (`ADMIN_EVENTS_CDC_METADATA_MAX_AGE_MS`) so newly created Debezium topics (for example `...tickets`) are discovered quickly.
 
 Run with CDC enabled:
 
@@ -222,3 +195,40 @@ Topic naming uses Debezium prefix + database + table. With current config (`debe
 
 - `my.agentscustomerstickets_db.users`
 - `my.agentscustomerstickets_db.tickets`
+
+Kafka message keying for CDC is configured in `config/debezium/application.properties` using `debezium.source.message.key.columns`:
+
+- `users` and `tickets` topics use `agent_id` as the Kafka key (better per-agent partition parallelism).
+
+## Appendix: (Phase 2) Users Internal Microservice
+
+Phase 2 extends phase 1 by running users capabilities in a separate `users-service` process while keeping the modular monolith boundaries and API contracts intact.
+The monolith still depends on `users.api`, but at runtime those calls can be routed over internal REST to `users-service` instead of in-process adapters.
+This gives process-level isolation for users logic without changing controllers in other modules.
+
+Runtime options:
+
+- **Local execution (embedded)**: modules call users behavior in-process through:
+  - [`users/infra/UserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserDirectoryAdapter.java)
+  - [`users/infra/UserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/UserManagementAdapter.java)
+- **Remote execution (users as internal microservice)**: modules still depend on the same `users.api` interfaces, but Spring wires REST-backed adapters:
+  - [`users/infra/remote/RemoteUsersClientConfig.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUsersClientConfig.java)
+  - [`users/infra/remote/RemoteUserDirectoryAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUserDirectoryAdapter.java)
+  - [`users/infra/remote/RemoteUserManagementAdapter.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/RemoteUserManagementAdapter.java)
+  - Internal endpoints are exposed by [`users/infra/remote/InternalUsersController.java`](src/main/java/com/agentscustomerstickets/users/infra/remote/InternalUsersController.java).
+
+This means controllers in other modules do not change between phases; only runtime wiring changes through configuration.
+
+### Development
+
+```bash
+# Build the app in phase 2 mode
+./scripts/build.sh --users-ms
+```
+
+### Deployment
+
+```bash
+# Start MySQL + app + dedicated users-service container
+USERS_INTEGRATION_MODE=remote docker compose --profile users-ms up -d --build
+```
