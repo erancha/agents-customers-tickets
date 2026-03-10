@@ -6,6 +6,7 @@ import com.agentscustomerstickets.users.api.Role;
 import com.agentscustomerstickets.shared.error.ConflictException;
 import com.agentscustomerstickets.shared.error.InvalidCredentialsException;
 import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,11 @@ public class UsersService {
       user.setAgentId(agentId);
       user.setFullName(fullName);
       user.setEmail(email);
-      return userRepository.save(user);
+      try {
+         return userRepository.save(user);
+      } catch (DataIntegrityViolationException e) {
+         throw new ConflictException("Username already exists");
+      }
    }
 
    @Transactional(readOnly = true)
