@@ -28,3 +28,14 @@ users:
     mode: ${USERS_INTEGRATION_MODE:embedded}
     base-url: ${USERS_INTEGRATION_BASE_URL:http://localhost:8081}
     internal-api-key: ${USERS_INTEGRATION_INTERNAL_API_KEY:internal-users-key}
+
+websocket:
+  broker:
+    relay:
+      enabled: ${WS_BROKER_RELAY_ENABLED:false}
+      host: ${WS_BROKER_RELAY_HOST:localhost}
+      port: ${WS_BROKER_RELAY_PORT:61613}
+      client-login: ${WS_BROKER_RELAY_CLIENT_LOGIN:guest}
+      client-passcode: ${WS_BROKER_RELAY_CLIENT_PASSCODE:guest}
+      system-login: ${WS_BROKER_RELAY_SYSTEM_LOGIN:guest}
+      system-passcode: ${WS_BROKER_RELAY_SYSTEM_PASSCODE:guest}

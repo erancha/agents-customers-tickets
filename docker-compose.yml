@@ -9,18 +9,44 @@ x-shared-integration-env: &shared-integration-env
 x-shared-runtime-env: &shared-runtime-env
   SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
 
+x-shared-cdc-env: &shared-cdc-env
+  CDC_TOPIC_PARTITIONS: ${CDC_TOPIC_PARTITIONS:-2}
+
+x-shared-restart-policy: &shared-restart-policy
+  restart: on-failure:3
+  deploy:
+    restart_policy:
+      condition: on-failure
+      delay: 10s
+      max_attempts: 3
+      window: 30s
+
 x-shared-app-env: &shared-app-env
-  <<: [*shared-db-env, *shared-integration-env, *shared-runtime-env]
+  <<: [*shared-db-env, *shared-integration-env, *shared-runtime-env, *shared-cdc-env]
   USERS_INTEGRATION_MODE: ${USERS_INTEGRATION_MODE:-embedded}
   KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
+  WS_BROKER_RELAY_ENABLED: ${WS_BROKER_RELAY_ENABLED:-false}
+  WS_BROKER_RELAY_HOST: ${WS_BROKER_RELAY_HOST:-rabbitmq}
+  WS_BROKER_RELAY_PORT: ${WS_BROKER_RELAY_PORT:-61613}
+  WS_BROKER_RELAY_CLIENT_LOGIN: ${WS_BROKER_RELAY_CLIENT_LOGIN:-guest}
+  WS_BROKER_RELAY_CLIENT_PASSCODE: ${WS_BROKER_RELAY_CLIENT_PASSCODE:-guest}
+  WS_BROKER_RELAY_SYSTEM_LOGIN: ${WS_BROKER_RELAY_SYSTEM_LOGIN:-guest}
+  WS_BROKER_RELAY_SYSTEM_PASSCODE: ${WS_BROKER_RELAY_SYSTEM_PASSCODE:-guest}
   # LOGGING_LEVEL_ROOT: DEBUG
-  # LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [${APP_INSTANCE:-unknown}] ${PID:- } --- [%t] %logger{39} : %m%n%wEx"
+  LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [$${APP_INSTANCE:-unknown}] ${PID:- } --- [%t] %logger{39} : %m%n%wEx"
 
 x-shared-app-base: &shared-app-base
+  <<: *shared-restart-policy
+  build:
+    context: .
+    dockerfile: Dockerfile
   image: agents-customers-tickets:local
   depends_on:
     mysql:
       condition: service_healthy
+    debezium:
+      condition: service_started
+      required: false
   environment:
     <<: *shared-app-env
 
@@ -75,6 +101,8 @@ services:
       - redpanda:33145
       - --advertise-rpc-addr
       - redpanda:33145
+      - --set
+      - redpanda.default_topic_partitions=${CDC_TOPIC_PARTITIONS:-2}
     ports:
       - "19092:19092"
       - "18082:18082"
@@ -103,6 +131,7 @@ services:
       redpanda:
         condition: service_started
     environment:
+      <<: *shared-cdc-env
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
     volumes:
       - ./config/debezium/application.properties:/debezium/config/application.properties:ro
@@ -140,6 +169,21 @@ services:
         server {
           listen 80;
 
+          location /ws/ {
+            proxy_pass http://app_upstream;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $$host;
+            proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $$scheme;
+            # WebSockets can be quiet for long periods; nginx defaults may close idle upstream connections (~60s).
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+            # Disable buffering for WS so frames are passed through immediately.
+            proxy_buffering off;
+          }
+
           location / {
             proxy_pass http://app_upstream;
             proxy_set_header Host $$host;
@@ -150,8 +194,27 @@ services:
         EOF
         nginx -g 'daemon off;'
 
+  rabbitmq:
+    profiles: ["ws-relay"]
+    image: rabbitmq:3.13.3-management
+    command: >-
+      /bin/sh -lc "rabbitmq-plugins enable --offline rabbitmq_stomp;
+      rabbitmq-server"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${WS_BROKER_RELAY_SYSTEM_LOGIN:-guest}
+      RABBITMQ_DEFAULT_PASS: ${WS_BROKER_RELAY_SYSTEM_PASSCODE:-guest}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "61613:61613"
+      - "15672:15672"
+
   users-service:
     profiles: ["users-ms"]
+    <<: *shared-restart-policy
     build:
       context: .
       dockerfile: Dockerfile

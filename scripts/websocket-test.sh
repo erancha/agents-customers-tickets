@@ -4,7 +4,7 @@ set -euo pipefail
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin123}"
-TOPIC="${TOPIC:-/topic/admin/events}"
+TOPIC="${TOPIC:-/topic/admin.events}"
 
 fail() {
   echo "ERROR: $1" >&2

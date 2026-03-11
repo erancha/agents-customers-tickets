@@ -19,7 +19,7 @@ public class AdminEventsPublisher {
 
       private static final Logger log = LoggerFactory.getLogger(AdminEventsPublisher.class);
 
-      static final String ADMIN_EVENTS_TOPIC = "/topic/admin/events";
+      static final String ADMIN_EVENTS_TOPIC = "/topic/admin.events";
 
       private final SimpMessagingTemplate messagingTemplate;
       private final boolean cdcProfileActive;

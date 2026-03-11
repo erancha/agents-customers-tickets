@@ -50,6 +50,15 @@
       <groupId>org.springframework.kafka</groupId>
       <artifactId>spring-kafka</artifactId>
     </dependency>
+    <!--
+      reactor-netty is included to support Spring's WebSocket STOMP relay features.
+      When using Spring's WebSocket messaging (e.g., with STOMP broker relay), reactor-netty is required as the transport for Netty-based WebSocket endpoints.
+      Remove only if you are certain you do not use STOMP/WebSocket over Netty.
+    -->
+    <dependency>
+      <groupId>io.projectreactor.netty</groupId>
+      <artifactId>reactor-netty</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.nimbusds</groupId>

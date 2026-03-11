@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="675" viewBox="-280 0 1480 675" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1300" viewBox="-280 0 1500 1300" role="img" aria-labelledby="title desc">
   <title id="title">Agents Customers Tickets - Architecture</title>
-  <desc id="desc">Modular monolith architecture with HTTP layer and five modules. Admin Events provides websocket push for admin clients and a CDC-profile Kafka consumer that forwards consumed messages to websocket subscribers. Debezium streams MySQL changes to Kafka. Users API is a dedicated dependency row above Shared concerns, Configuration, and Persistence; only Persistence accesses MySQL. Boxes are clickable and link to source folders.</desc>
+  <desc id="desc">Modular monolith architecture with HTTP layer and five modules. Admin Events provides websocket push for admin clients and a CDC-profile Kafka consumer that forwards consumed messages to websocket subscribers. Debezium streams MySQL changes to Kafka. Users API is a dedicated dependency row above Shared concerns, Configuration, and Persistence; only Persistence accesses MySQL. A second condensed replica view appears below, with title-only boxes and an offset full-size background frame to emphasize duplicated app shape. Boxes are clickable and link to source folders in the primary view.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#f4f8ff"/>
@@ -22,11 +22,9 @@
       <path d="M0,0 L8,3 L0,6 Z" fill="#51697f"/>
     </marker>
   </defs>
-  <g transform="matrix(1, 0, 0, 1, 3.716645, -86.912331)">
-    <rect width="1480" height="656.417" fill="url(#bg)" rx="20" style="" x="-282.287" y="91.486"/>
-    <path class="arrow" d="M 447.141 315.708 C 447.141 315.708 913.98 363.786 948.03 391.026" style="stroke-width: 2.3;"/>
-    <path class="arrow" d="M 729.607 313.422 C 729.607 313.422 889.52 320.025 945.743 373.873" style="stroke-width: 2.3;"/>
-  </g>
+  <rect width="1453.32" height="634.414" fill="url(#bg)" rx="20" style="stroke-width: 6px;" x="-261.86" y="26.577"/>
+  <path class="arrow" d="M 450.858 228.796 C 450.858 228.796 917.697 276.874 951.747 304.114" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 733.324 226.51 C 733.324 226.51 893.237 233.113 949.46 286.961" style="stroke-width: 2.3;"/>
   <rect x="-255" y="43.672" width="1416" height="47.573" rx="12" fill="#e8f2ff" stroke="#9db9d9" style=""/>
   <text class="layer" x="-239" y="68.672" style="white-space: pre; font-size: 13px;">Entry / HTTP Layer</text>
   <text class="hint" x="-239" y="84.11" style="white-space: pre; font-size: 11px;">REST and websocket endpoints delegate to module application services.</text>
@@ -34,7 +32,7 @@
     <rect x="-229" y="205" width="250" height="84.549" rx="12" fill="#eef3ff" stroke="#7e96d8" stroke-width="2" style=""/>
     <text class="box-title" x="-211" y="235" style="white-space: pre;">Admin Events</text>
     <text class="box-text" x="-211" y="255" style="white-space: pre;">web + application (Kafka consumer @ cdc)</text>
-    <text class="box-text" x="-211" y="274" style="white-space: pre;">WebSocket admin push stream + CDC fan-out</text>
+    <text class="box-text" x="-211" y="274" style="white-space: pre;">WebSocket push stream</text>
   </a>
   <a class="link" href="../src/main/java/com/agentscustomerstickets/agents/web" target="_blank" transform="matrix(1, 0, 0, 1, -6.8615, -66.327827)">
     <rect x="48" y="205" width="250" height="84.549" rx="12" fill="#eaf7ff" stroke="#72b6e5" stroke-width="2" style=""/>
@@ -65,11 +63,7 @@
     <text class="box-title" x="568.953" y="418.856" style="white-space: pre; font-size: 15px;">Users API</text>
     <text class="box-text" x="418" y="441" style="white-space: pre;" transform="matrix(1, 0, 0, 1, 91.486664, 0)">Identity lookup <tspan x="418" dy="1em">​</tspan>and user management contracts</text>
   </a>
-  <g transform="matrix(1, 0, 0, 1, 18.869122, 2.573062)">
-    <g transform="matrix(1, 0, 0, 1, -0.857687, 0)">
-      <rect x="2.872" y="395.064" width="1037.76" height="123.955" rx="12" fill="#ffffff" stroke="#9fb0bf" stroke-width="2" style=""/>
-    </g>
-  </g>
+  <rect x="20.883" y="397.637" width="1037.76" height="123.955" rx="12" fill="#ffffff" stroke="#9fb0bf" stroke-width="2" style="stroke-width: 2;"/>
   <text class="layer" x="41.139" y="477.672" style="white-space: pre; font-size: 13px;"> </text>
   <a class="link" href="../src/main/java/com/agentscustomerstickets/shared" target="_blank" transform="matrix(1, 0, 0, 1, -40.082775, -146.092758)">
     <rect x="80" y="560" width="320" height="82.687" rx="12" fill="#f6f0ff" stroke="#a994d4" stroke-width="2" style=""/>
@@ -121,4 +115,84 @@
   <path class="arrow" d="M 809.032 598.992 L 749.383 598.134" style=""/>
   <path class="arrow" d="M 445.83 608.348 L 516.119 580.203" style="transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-0.935472, -0.353401, 0.353401, -0.935472, 0.000025, 0.000051)"/>
   <path class="arrow" d="M 234.454 600.708 C 58.854 600.708 -110.47 467.667 -217.09 227.954" style="stroke-width: 2.3;"/>
+  <rect x="357.542" y="798.382" width="813.538" height="40.239" rx="12" fill="#e8f2ff" stroke="#9db9d9" style="stroke-width: 1;"/>
+  <text class="layer" style="white-space: pre; font-size: 13px;" x="372.494" y="821.287">Entry / HTTP Layer</text>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/admin/events" target="_blank" transform="matrix(1, 0, 0, 1, 511.926056, 672.173889)">
+    <rect x="-174.32" y="217.468" width="196.59" height="68.391" rx="12" fill="#eef3ff" stroke="#7e96d8" stroke-width="2" style=""/>
+    <text class="box-title" x="-165.046" y="235.975" style="white-space: pre; font-size: 15px;">Admin Events</text>
+    <text class="box-title" x="-165.046" y="260.975" style="white-space: pre; font-size: 15px;">(Kafka consumer</text>
+    <text class="box-title" x="-165.046" y="275.975" style="white-space: pre; font-size: 15px;">+ WebSocket push)</text>
+  </a>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/agents/web" target="_blank" transform="matrix(1, 0, 0, 1, 373.529205, 685.888855)">
+    <rect x="178.916" y="205" width="119.084" height="45.898" rx="12" fill="#eaf7ff" stroke="#72b6e5" stroke-width="2" style=""/>
+    <text class="box-title" x="185.695" y="233.753" style="white-space: pre; font-size: 15px;">Agents Module</text>
+  </a>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/customers" target="_blank" transform="matrix(1, 0, 0, 1, 268.796478, 687.135681)">
+    <rect x="423.499" y="205" width="151.501" height="43.301" rx="12" fill="#eefcf2" stroke="#7dc99a" stroke-width="2" style=""/>
+    <text class="box-title" x="427.784" y="233.753" style="white-space: pre; font-size: 15px;">Customers Module</text>
+  </a>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/tickets" target="_blank" transform="matrix(1, 0, 0, 1, 3.224206, 688.382507)">
+    <rect x="868.819" y="208.74" width="122.825" height="38.21" rx="12" fill="#fff8eb" stroke="#e4bb72" stroke-width="2" style=""/>
+    <text class="box-title" x="874.351" y="232.507" style="white-space: pre; font-size: 15px;">Tickets Module</text>
+  </a>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/users" target="_blank" transform="matrix(1, 0, 0, 1, 4.271966, 684.191467)">
+    <rect x="1019.89" y="212.334" width="132.11" height="41.16" rx="12" fill="#fff0f1" stroke="#da8f9a" stroke-width="2" style=""/>
+    <text class="box-title" x="1030.41" y="238.74" style="white-space: pre; font-size: 15px;">Users Module</text>
+  </a>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/users/api" target="_blank" transform="matrix(1, 0, 0, 1, 470.847626, 600.147522)">
+    <rect x="541.689" y="390" width="147.383" height="48.09" rx="12" fill="#fdeff4" stroke="#da8f9a" stroke-width="2" style=""/>
+    <text class="box-title" x="568.953" y="418.856" style="white-space: pre; font-size: 15px;">Users API</text>
+  </a>
+  <rect x="718.302" y="1063.29" width="439.489" height="83.092" rx="12" fill="#ffffff" stroke="#9fb0bf" stroke-width="2" style="stroke-width: 2;"/>
+  <text class="layer" x="41.791" y="1170.56" style="white-space: pre; font-size: 13px; stroke-width: 1;"> </text>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/shared" target="_blank" transform="matrix(1, 0, 0, 1, 472.927673, 518.510193)">
+    <rect x="269.645" y="565.239" width="131.403" height="42.873" rx="12" fill="#f6f0ff" stroke="#a994d4" stroke-width="2" style=""/>
+    <text class="box-title" x="277.167" y="588.952" style="white-space: pre; font-size: 15px;">Shared Concerns</text>
+  </a>
+  <a class="link" href="../src/main/resources/application.yml" target="_blank" transform="matrix(1, 0, 0, 1, 250.946304, 520.41571)">
+    <rect x="640.122" y="564.191" width="119.878" height="40.776" rx="12" fill="#e9f7ff" stroke="#79aac8" stroke-width="2" style=""/>
+    <text class="box-title" x="648.692" y="588.952" style="white-space: pre; font-size: 15px;">Configuration</text>
+  </a>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/tickets/infra" target="_blank" transform="matrix(1, 0, 0, 1, -67.677956, 610.047058)">
+    <rect x="1093.38" y="473.036" width="98.923" height="44.681" rx="12" fill="#f0fbff" stroke="#79b8d7" stroke-width="2" style=""/>
+    <text class="box-title" x="1102.99" y="500.94" style="white-space: pre; font-size: 15px;">Persistence</text>
+  </a>
+  <a class="link" href="../docker-compose.yml" target="_blank" transform="matrix(1, 0, 0, 1, 404.899933, 440.862854)">
+    <rect x="490.579" y="744" width="273.421" height="71.108" rx="12" fill="#fff2e5" stroke="#dc9b5b" stroke-width="2" style=""/>
+    <text class="box-title" x="564.11" y="772.857" style="white-space: pre; font-size: 15px;">MySQL (Docker Compose)</text>
+    <text class="box-text" x="501.245" y="799.096" style="white-space: pre; font-size: 12px;">Database is accessed through Persistence only</text>
+  </a>
+  <a class="link" href="../config/debezium/application.properties" target="_blank" transform="matrix(1, 0, 0, 1, 171.748795, 439.692596)">
+    <rect x="434" y="744" width="228" height="71.108" rx="12" fill="#fff7ea" stroke="#d9b06d" stroke-width="2" style=""/>
+    <text class="box-title" x="452" y="776" style="white-space: pre;">Debezium Server</text>
+    <text class="box-text" x="452" y="797" style="white-space: pre;">MySQL CDC connector and sink</text>
+  </a>
+  <a class="link" href="../docker-compose.yml" target="_blank" transform="matrix(1, 0, 0, 1, -114.571091, 442.835876)">
+    <rect x="434" y="744" width="208" height="71.108" rx="12" fill="#ecf7ff" stroke="#7faecd" stroke-width="2" style=""/>
+    <text class="box-title" x="452" y="776" style="white-space: pre;">Kafka / Redpanda</text>
+    <text class="box-text" x="452" y="797" style="white-space: pre;">CDC topics for consumers</text>
+  </a>
+  <path class="arrow" d="M 781.137 844.708 L 781.137 892.135" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 938.443 848.449 L 938.443 895.876" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 1081.81 847.202 L 1081.81 894.629" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 1071.21 948.824 L 1098.51 984.229" style="stroke-width: 2.3; transform-origin: 1084.85px 966.527px;" transform="matrix(-0.783764, -0.621059, 0.621059, -0.783764, -0.000024, 0.000059)"/>
+  <path class="arrow" d="M 1071.94 1182.57 L 1072.4 1126.05" style="stroke-width: 2.3; transform-origin: 1072.17px 1154.32px;" transform="matrix(-1, 0, 0, -1, 0.000031, 0.000077)"/>
+  <path class="arrow" d="M 613.857 847.202 L 613.857 889.642" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 455.705 864.494 L 455.705 899.386" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 456.035 885.967 L 456.562 842.55" style="stroke-width: 2.3; transform-origin: 456.302px 864.259px;"/>
+  <path class="arrow" d="M 893.509 1219.58 L 833.86 1218.73" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 529.26 1228.94 L 599.549 1200.79" style="stroke-width: 2.3; transform-origin: 564.404px 1214.87px;" transform="matrix(-0.935472, -0.353401, 0.353401, -0.935472, 0.000032, 0.000016)"/>
+  <path class="arrow" d="M 447.235 959.971 C 441.739 963.44 451.487 1050.87 401.703 1183.59" style="stroke-width: 2.3; transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-1, 0, 0, -1, -0.000041, 0.00004)"/>
+  <rect x="14.104" y="898.348" width="255.056" height="105.698" rx="12" fill="#f7f3ff" stroke="#b48be0" stroke-width="2" style=""/>
+  <text class="box-title" x="25.8" y="926.696" style="font-size: 15px; fill: rgb(107, 63, 160); white-space: pre;">RabbitMQ (STOMP Broker Relay)</text>
+  <text class="box-text" x="29.823" y="953.442" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">Fans out admin events</text>
+  <text class="box-text" x="28.963" y="968.442" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">to all connected replicas</text>
+  <text class="box-text" x="29.823" y="985.162" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">via STOMP relay</text>
+  <path class="arrow" d="M 273.246 956.164 L 337.079 930.606" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: 305.162px 943.385px;"/>
+  <rect x="312.463" y="774.883" width="876.405" height="384.847" rx="12" style="stroke-linecap: square; fill: rgb(180, 235, 190); fill-opacity: 0.18; stroke-width: 10px; stroke-opacity: 0.55; stroke: rgb(34, 139, 34);"/>
+  <rect x="293.597" y="757.595" width="878.5" height="395.325" rx="12" style="stroke-linecap: square; fill: rgb(180, 235, 190); fill-opacity: 0.18; stroke-width: 10; stroke-opacity: 0.55; stroke: rgb(34, 139, 34); opacity: 0.28;"/>
+  <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="115.721" y="940.589"> </text>
+  <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="55.998" y="714.273"> </text>
+  <text style="fill: rgb(34, 139, 34); font-family: Arial, sans-serif; font-size: 25px; white-space: pre;" x="290.868" y="740.52">Application replicas (modular monolith or specific microservices)</text>
+  <path class="arrow" d="M 320.718 936.775 L 268.399 956.816" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: 22.249px 1116.72px;"/>
 </svg>

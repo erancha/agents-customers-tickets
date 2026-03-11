@@ -6,8 +6,8 @@ Spring Boot backend service implemented as a modular monolith (clear internal mo
 
 Users persistence internals are now encapsulated inside the `users` module:
 
-- `UserRepository` and `UsersService` remain in `users.infra` and are not consumed directly by other modules.
-- Other modules depend on `users.api` contracts for user read/write access:
+- `UserRepository` and `UsersService` remain in `users.infra` and are not consumed directly by the other modules.
+- The other modules depend on `users.api` contracts for user read/write access:
   - [`users/api/User.java`](src/main/java/com/agentscustomerstickets/users/api/User.java)
   - [`users/api/UserDirectory.java`](src/main/java/com/agentscustomerstickets/users/api/UserDirectory.java)
   - [`users/api/UserManagement.java`](src/main/java/com/agentscustomerstickets/users/api/UserManagement.java)
@@ -45,6 +45,9 @@ With [docker-compose.yml](docker-compose.yml):
 ```bash
 # Start MySQL and run the application service
 docker compose up -d
+
+# To force a rebuild and recreate containers (after code/config changes):
+docker compose up -d --build --force-recreate
 ```
 
 The application service listens on `http://localhost:8080`.
@@ -85,9 +88,9 @@ The application service listens on `http://localhost:8080`.
   | `GET` | `/api/agents` | `ADMIN` only. Lists all agent accounts. |
   | `POST` | `/api/customers` | `AGENT` can create own customers; `ADMIN` can create customers when `agentId` is provided. |
   | `GET` | `/api/customers` | `AGENT` sees customers assigned to that agent; `ADMIN` can list all or filter by `agentId`. |
-  | `POST` | `/api/tickets` | `CUSTOMER` only. Creates a ticket tied to the authenticated customer users. |
+  | `POST` | `/api/tickets` | `CUSTOMER` only. Creates a ticket tied to an authenticated customer. |
   | `GET` | `/api/tickets` | Role-based result set: `CUSTOMER` sees own tickets, `AGENT` sees assigned tickets, `ADMIN` can query globally and filter by `agentId` and/or `customerId`. |
-  | `WS (STOMP)` | `/ws/admin-events` | `ADMIN` only (JWT Bearer in `CONNECT` headers). Subscribe to `/topic/admin/events` for admin push events. |
+  | `WS (STOMP)` | `/ws/admin-events` | `ADMIN` only (JWT Bearer in `CONNECT` headers). Subscribe to `/topic/admin.events` for admin push events. |
   - Request DTO annotations are used across controllers, e.g.:
     - [`createCustomer`](src/main/java/com/agentscustomerstickets/customers/web/CustomersController.java#L60) in [`CustomersController`](src/main/java/com/agentscustomerstickets/customers/web/CustomersController.java)
     - [`CreateTicketRequest`](src/main/java/com/agentscustomerstickets/tickets/web/TicketsController.java#L53) in [`TicketsController`](src/main/java/com/agentscustomerstickets/tickets/web/TicketsController.java)
@@ -128,14 +131,17 @@ Users can only access resources appropriate to their role.
 - **[`Dockerfile`](Dockerfile)** for the application service
 - **[`docker-compose.yml`](docker-compose.yml)** for local orchestration (MySQL + application service)
 
-### Admin websocket events
+## Admin websocket events
 
 - Endpoint: `/ws/admin-events` (STOMP over WebSocket)
-- Topic: `/topic/admin/events`
+- STOMP topic: `/topic/admin.events` (admin events are published here; clients subscribe to receive real-time admin event notifications)
 - Security: JWT Bearer token is required in STOMP `CONNECT` headers; only `ADMIN` can connect/subscribe.
 - Initial published events:
   - `AGENT_CREATED`
   - `CUSTOMER_CREATED`
+- Default broker mode: Spring in-memory simple broker (per application instance).
+  - In multi-replica deployments, each websocket client receives by default only events published by the instance it is connected to.
+  - To fan out admin events across application replicas, enable [Shared relay mode](#shared-relay-mode-cross-replica-websocket-fan-out), below.
 - Main components:
   - [`admin/events/web/AdminEventsWebSocketConfig.java`](src/main/java/com/agentscustomerstickets/admin/events/web/AdminEventsWebSocketConfig.java)
   - [`admin/events/web/AdminEventsWebSocketAuthInterceptor.java`](src/main/java/com/agentscustomerstickets/admin/events/web/AdminEventsWebSocketAuthInterceptor.java)
@@ -147,47 +153,59 @@ Quick local check:
 ./scripts/websocket-test.sh
 ```
 
-### CDC (MySQL Create/Modify/Delete to Kafka)
+### Shared relay mode (cross-replica websocket fan-out)
 
-`docker-compose.yml` enables MySQL row-based binary logging and runs Debezium Server (profile `cdc`) to publish CDC events to Kafka.
-
-The admin Kafka consumer that republishes each consumed CDC message to `/topic/admin/events` (see [Admin websocket events](#admin-websocket-events)) is controlled by Spring profile `cdc` (runtime), not by Maven build profiles.
-
-The `cdc` profile includes a local Redpanda broker and Redpanda Console.
-
-When running in Docker Compose, the app Kafka consumer uses `KAFKA_BOOTSTRAP_SERVERS=redpanda:9092` (container network).
-When running the JAR locally, the default remains `localhost:19092`.
-
-For topic-pattern subscriptions, the consumer metadata refresh is set to 10s (`ADMIN_EVENTS_CDC_METADATA_MAX_AGE_MS`) so newly created Debezium topics (for example `...tickets`) are discovered quickly.
-
-Run with CDC enabled:
+See the [architecture diagram (replica/relay section)](docs/architecture.svg) for a visual overview: in relay mode, RabbitMQ acts as a shared STOMP broker, receiving admin events from any app instance and delivering them to all connected replicas, ensuring all admin websocket clients receive the same events regardless of which replica they are connected to.
 
 ```bash
+# Start RabbitMQ STOMP broker + app stack
+WS_BROKER_RELAY_ENABLED=true docker compose --profile ws-relay up -d
+
+# Optional explicit relay credentials/host overrides
+WS_BROKER_RELAY_ENABLED=true \
+WS_BROKER_RELAY_HOST=rabbitmq \
+WS_BROKER_RELAY_PORT=61613 \
+WS_BROKER_RELAY_CLIENT_LOGIN=guest \
+WS_BROKER_RELAY_CLIENT_PASSCODE=guest \
+WS_BROKER_RELAY_SYSTEM_LOGIN=guest \
+WS_BROKER_RELAY_SYSTEM_PASSCODE=guest \
+docker compose --profile ws-relay up -d
+```
+
+## CDC (MySQL Create/Modify/Delete to Kafka)
+
+### Docker Compose (infrastructure)
+
+- `docker-compose.yml` enables MySQL row-based binary logging.
+- Docker Compose profile `cdc` starts Debezium Server, which publishes CDC events to Kafka.
+- Docker Compose profile `cdc` also starts local Redpanda services (broker + Redpanda Console).
+
+### Application Logic (runtime)
+
+- Spring profile `cdc` enables the app Kafka consumer that republishes consumed CDC messages to `/topic/admin.events` (see [Admin websocket events](#admin-websocket-events)).
+
+Runtime quick reference:
+
+- Docker Compose app runtime:
+  - `KAFKA_BOOTSTRAP_SERVERS=redpanda:9092` (container network).
+  - Host machine broker endpoint: `localhost:19092`.
+  - Redpanda Console: `http://localhost:8089`.
+- Local JAR runtime:
+  - `KAFKA_BOOTSTRAP_SERVERS` default: `localhost:19092`.
+
+```bash
+# 1) Full local stack (recommended): Docker Compose + cdc profile
 SPRING_PROFILES_ACTIVE=docker,cdc docker compose --profile cdc up -d
 docker compose logs -f debezium
-```
 
-If you run the JAR directly instead of Compose, enable profile `cdc` the same way:
-
-```bash
+# 2) Run the built JAR with cdc profile
 SPRING_PROFILES_ACTIVE=cdc java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
-```
 
-If you run via the build script, `--run` does not add `cdc` automatically, so pass it through the environment:
-
-```bash
+# 3) Run via build script with --run and cdc explicitly set
+# (--run does not enable cdc automatically)
 SPRING_PROFILES_ACTIVE=cdc ./scripts/build.sh --run
-```
 
-Local endpoints:
-
-- Kafka broker: `localhost:19092`
-- Redpanda Console: `http://localhost:8089`
-
-Debezium target broker defaults to `redpanda:9092`.
-This can be overridden at runtime:
-
-```bash
+# 4) Optional: override Debezium target broker at runtime
 KAFKA_BOOTSTRAP_SERVERS=<host:port> docker compose --profile cdc up -d
 ```
 
@@ -196,9 +214,7 @@ Topic naming uses Debezium prefix + database + table. With current config (`debe
 - `my.agentscustomerstickets_db.users`
 - `my.agentscustomerstickets_db.tickets`
 
-Kafka message keying for CDC is configured in `config/debezium/application.properties` using `debezium.source.message.key.columns`:
-
-- `users` and `tickets` topics use `agent_id` as the Kafka key (better per-agent partition parallelism).
+Kafka message keying for CDC can be configured in [`config/debezium/application.properties`](config/debezium/application.properties) using `debezium.source.message.key.columns`
 
 ## Appendix: (Phase 2) Users Internal Microservice
 
