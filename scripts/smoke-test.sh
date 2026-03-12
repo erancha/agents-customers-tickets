@@ -1,5 +1,16 @@
+
 #!/usr/bin/env bash
 set -euo pipefail
+
+# Parse args for --quiet or -q (must be global for all functions)
+quiet=0
+for arg in "$@"; do
+  case $arg in
+    -q|--quiet)
+      quiet=1
+      ;;
+  esac
+done
 
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
@@ -202,10 +213,14 @@ create_agent() {
   local username="$2"
   local email="$3"
 
-  echo "Creating agent '$username'..." >&2
+  if [[ "${quiet:-0}" -eq 0 ]]; then
+    echo "Creating agent '$username'..." >&2
+  fi
   local body
   body=$(json_post_raw "$BASE_URL/api/agents" "$admin_token" "{\"username\":\"$username\",\"password\":\"$DEMO_AGENT_PASSWORD\",\"fullName\":\"$DEMO_AGENT_FULL_NAME\",\"email\":\"$email\"}")
-  echo "$body" >&2
+  if [[ "${quiet:-0}" -eq 0 ]]; then
+    echo "$body" >&2
+  fi
   local id
   id=$(echo "$body" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p')
   [[ -n "$id" ]] || fail "Failed to parse agent id from response: $body"
@@ -217,18 +232,67 @@ create_customer_for_agent() {
   local username="$2"
   local email="$3"
 
-  echo "Creating customer '$username' under agent..." >&2
+  if [[ "${quiet:-0}" -eq 0 ]]; then
+    echo "Creating customer '$username' under agent..." >&2
+  fi
   local body
   body=$(json_post_raw "$BASE_URL/api/customers" "$agent_token" "{\"username\":\"$username\",\"password\":\"$DEMO_CUSTOMER_PASSWORD\",\"fullName\":\"$DEMO_CUSTOMER_FULL_NAME\",\"email\":\"$email\"}")
-  echo "$body" >&2
+  if [[ "${quiet:-0}" -eq 0 ]]; then
+    echo "$body" >&2
+  fi
   local id
   id=$(echo "$body" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p')
   [[ -n "$id" ]] || fail "Failed to parse customer id from response: $body"
   echo "$id"
 }
 
+
+# Quiet mode helpers (must be global)
+qecho() { if [[ $quiet -eq 0 ]]; then echo "$@"; fi; }
+qstep() { if [[ $quiet -eq 0 ]]; then step "$@"; fi; }
+
+
+# Always print summary/stats, even on error
+print_summary() {
+  local end_time elapsed elapsed_min elapsed_sec
+  end_time=$(date +%s)
+  elapsed=$((end_time - start_time))
+  elapsed_min=$((elapsed / 60))
+  elapsed_sec=$((elapsed % 60))
+  echo
+  echo "============================"
+  echo "Elapsed time: $(printf '%02d:%02d' "$elapsed_min" "$elapsed_sec") (mm:ss)"
+  echo "Created users: $created_users"
+  echo "Created tickets: $created_tickets"
+  echo "============================"
+
+  echo
+  echo "Docker container stats (CPU, MEM, I/O, NET):"
+  if command -v docker &>/dev/null; then
+    docker stats --no-stream
+  elif command -v docker-compose &>/dev/null; then
+    docker-compose ps
+    echo "(Tip: 'docker stats --no-stream' gives live resource usage if docker CLI is available)"
+  else
+    echo "docker or docker-compose not found. Skipping container stats."
+  fi
+
+  echo
+  echo "Done."
+}
+
+# Set small safe defaults
+customer_count=2000
+tickets_per_customer=20
+created_users=0
+created_tickets=0
+start_time=$(date +%s)
+
+# Trap to always print summary/stats
+trap 'if [[ $? -ne 0 ]]; then echo "[WARN] Script exited early due to error."; fi; print_summary' EXIT
+
 main() {
-  echo "Base URL: $BASE_URL"
+  qecho "Base URL: $BASE_URL"
 
   require_server
 
@@ -238,36 +302,35 @@ main() {
 
   local agent_username="agent_${run_id}"
   local agent_email="agent_${run_id}@example.com"
-  local customer_count=2
-  local tickets_per_customer=2
   local customers_usernames=()
   local customers_emails=()
   local customers_ids=()
   local customers_tokens=()
 
-  step "Getting admin JWT..."
+  qstep "Getting admin JWT..."
   local admin_token
   admin_token=$(get_token "$ADMIN_USERNAME" "$ADMIN_PASSWORD")
 
-  step "Creating a fresh agent for this run..."
+  qstep "Creating a fresh agent for this run..."
   local agent_id
   agent_id=$(create_agent "$admin_token" "$agent_username" "$agent_email")
-  echo "Agent id: $agent_id"
-  echo "Agent username: $agent_username"
-  echo "Agent password: $DEMO_AGENT_PASSWORD"
+  ((++created_users))
+  qecho "Agent id: $agent_id"
+  qecho "Agent username: $agent_username"
+  qecho "Agent password: $DEMO_AGENT_PASSWORD"
 
-  step "Getting agent JWT..."
+  qstep "Getting agent JWT..."
   local agent_token
   agent_token=$(get_token "$agent_username" "$DEMO_AGENT_PASSWORD")
 
-  # step "Failing to create an agent by the first agent..."
+  # qstep "Failing to create an agent by the first agent..."
   # create_agent "$agent_token" "dontcare_username" "dontcare_email"
 
-  step "Listing agents (admin token required)..."
-  json_get "$BASE_URL/api/agents" "$admin_token"
-  echo
+  qstep "Listing agents (admin token required)..."
+  if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/agents" "$admin_token"; fi
+  qecho
 
-  step "Creating ${customer_count} fresh customers for this run..."
+  qstep "Creating ${customer_count} fresh customers for this run..."
   for i in $(seq 1 "$customer_count"); do
     customers_usernames+=("customer_${run_id}_${i}")
     customers_emails+=("customer_${run_id}_${i}@example.com")
@@ -275,45 +338,45 @@ main() {
     local cid
     cid=$(create_customer_for_agent "$agent_token" "${customers_usernames[$((i-1))]}" "${customers_emails[$((i-1))]}")
     customers_ids+=("$cid")
+    ((++created_users))
   done
 
-  step "Listing customers of the agent..."
-  json_get "$BASE_URL/api/customers" "$agent_token"
-  echo
+  qstep "Listing customers of the agent..."
+  if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/customers" "$agent_token"; fi
+  qecho
 
   for i in $(seq 1 "$customer_count"); do
-    step "Getting customer #${i} JWT..."
+    qstep "Getting customer #${i} JWT..."
     local ctoken
     ctoken=$(get_token "${customers_usernames[$((i-1))]}" "$DEMO_CUSTOMER_PASSWORD")
     customers_tokens+=("$ctoken")
 
-    step "Creating $tickets_per_customer tickets for customer #${i}..."
+    qstep "Creating $tickets_per_customer tickets for customer #${i}..."
     for t in $(seq 1 "$tickets_per_customer"); do
       local ticket_resp
       ticket_resp=$(json_post "$BASE_URL/api/tickets" "$ctoken" "{\"title\":\"Test ticket c${i} #${t} $(date +%s)\",\"description\":\"Created by smoke-test.sh\"}")
-      echo "$ticket_resp"
+      ((++created_tickets))
+      if [[ $quiet -eq 0 ]]; then echo "$ticket_resp"; fi
     done
 
-    step "Listing tickets for customer #${i}..."
-    json_get "$BASE_URL/api/tickets" "$ctoken"
-    echo
+    qstep "Listing tickets for customer #${i}..."
+    if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/tickets" "$ctoken"; fi
+    qecho
   done
 
-  step "Listing tickets for the agent (all customers)..."
-  json_get "$BASE_URL/api/tickets" "$agent_token"
-  echo
+  qstep "Listing tickets for the agent (all customers)..."
+  if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/tickets" "$agent_token"; fi
+  qecho
 
   for i in $(seq 1 "$customer_count"); do
-    step "Listing tickets for the agent (filtered by customer #${i}) :"
-    json_get "$BASE_URL/api/tickets?customerId=${customers_ids[$((i-1))]}" "$agent_token"
-    echo
+    qstep "Listing tickets for the agent (filtered by customer #${i}) :"
+    if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/tickets?customerId=${customers_ids[$((i-1))]}" "$agent_token"; fi
+    qecho
 
-    step ".. and as admin :"
-    json_get "$BASE_URL/api/tickets?agentId=$agent_id&customerId=${customers_ids[$((i-1))]}" "$admin_token"
-    echo
+    qstep ".. and as admin :"
+    if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/tickets?agentId=$agent_id&customerId=${customers_ids[$((i-1))]}" "$admin_token"; fi
+    qecho
   done
-
-  echo "Done."
 }
 
 main "$@"

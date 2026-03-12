@@ -1,5 +1,12 @@
 {
-  "cSpell.words": ["agentscustomerstickets", "stompjs"],
+  "cSpell.words": [
+    "agentscustomerstickets",
+    "ctoken",
+    "dontcare",
+    "qecho",
+    "qstep",
+    "stompjs"
+  ],
   "editor.rulers": [120],
   "editor.wordWrap": "wordWrapColumn",
   "editor.wordWrapColumn": 120,
