@@ -1,0 +1,490 @@
+
+
+====================================================================================
+Starting smoke test iteration 1 of 10 at 2026-03-15 15:21:41 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 433
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 118
+      1 java            java -jar /app/app.jar
+  java threads (approx): 153
+  TOTAL java threads (approx): 271 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 1380
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 117
+      1 java            java -jar /app/app.jar
+  java threads (approx): 201
+  TOTAL java threads (approx): 318 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:45 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    2.43MB / 2.44MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.21%     399.6MiB / 1GiB     39.02%    1.56MB / 1.44MB   0B / 102kB       117
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.18%     408.3MiB / 1GiB     39.87%    1.58MB / 1.46MB   0B / 102kB       201
+29cb889b1a2f   agents-customers-tickets-mysql-1      1.09%     502.9MiB / 2GiB     24.56%    1.75MB / 1.86MB   65.4MB / 333MB   179
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 2 of 10 at 2026-03-15 15:22:30 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 1764
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 127
+      1 java            java -jar /app/app.jar
+  java threads (approx): 202
+  TOTAL java threads (approx): 329 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 1972
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 125
+      1 java            java -jar /app/app.jar
+  java threads (approx): 202
+  TOTAL java threads (approx): 327 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:42 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    4.87MB / 4.88MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.73%     415MiB / 1GiB       40.53%    3.06MB / 2.84MB   0B / 127kB       125
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.32%     430MiB / 1GiB       41.99%    3.06MB / 2.84MB   0B / 127kB       199
+29cb889b1a2f   agents-customers-tickets-mysql-1      9.36%     512.7MiB / 2GiB     25.03%    3.37MB / 3.56MB   65.4MB / 363MB   229
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 3 of 10 at 2026-03-15 15:23:15 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2076
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 128
+      1 java            java -jar /app/app.jar
+  java threads (approx): 200
+  TOTAL java threads (approx): 328 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2152
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 126
+      1 java            java -jar /app/app.jar
+  java threads (approx): 195
+  TOTAL java threads (approx): 321 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:41 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    7.3MB / 7.31MB    0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.57%     444.1MiB / 1GiB     43.37%    4.51MB / 4.18MB   0B / 164kB       126
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.59%     454MiB / 1GiB       44.34%    4.51MB / 4.19MB   0B / 164kB       194
+29cb889b1a2f   agents-customers-tickets-mysql-1      7.60%     516MiB / 2GiB       25.19%    4.9MB / 5.19MB    65.4MB / 397MB   241
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 4 of 10 at 2026-03-15 15:23:58 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2247
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 131
+      1 java            java -jar /app/app.jar
+  java threads (approx): 193
+  TOTAL java threads (approx): 324 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2165
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 129
+      1 java            java -jar /app/app.jar
+  java threads (approx): 191
+  TOTAL java threads (approx): 320 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:42 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    9.74MB / 9.75MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.32%     447.3MiB / 1GiB     43.69%    5.96MB / 5.52MB   0B / 188kB       129
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.23%     464.9MiB / 1GiB     45.40%    5.96MB / 5.53MB   0B / 188kB       191
+29cb889b1a2f   agents-customers-tickets-mysql-1      7.87%     517.3MiB / 2GiB     25.26%    6.42MB / 6.82MB   65.4MB / 431MB   243
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 5 of 10 at 2026-03-15 15:24:43 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2160
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 130
+      1 java            java -jar /app/app.jar
+  java threads (approx): 192
+  TOTAL java threads (approx): 322 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2200
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 129
+      1 java            java -jar /app/app.jar
+  java threads (approx): 191
+  TOTAL java threads (approx): 320 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:40 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    12.2MB / 12.2MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.34%     456.4MiB / 1GiB     44.57%    7.41MB / 6.83MB   0B / 201kB       129
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.55%     476MiB / 1GiB       46.49%    7.4MB / 6.86MB    0B / 201kB       191
+29cb889b1a2f   agents-customers-tickets-mysql-1      1.60%     519.3MiB / 2GiB     25.36%    7.9MB / 8.43MB    65.4MB / 475MB   243
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 6 of 10 at 2026-03-15 15:25:26 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2356
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 130
+      1 java            java -jar /app/app.jar
+  java threads (approx): 192
+  TOTAL java threads (approx): 322 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2040
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 129
+      1 java            java -jar /app/app.jar
+  java threads (approx): 191
+  TOTAL java threads (approx): 320 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:40 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.719MiB / 25MiB    18.88%    14.6MB / 14.6MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.30%     463.9MiB / 1GiB     45.30%    8.86MB / 8.15MB   0B / 213kB       129
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.49%     478.8MiB / 1GiB     46.76%    8.85MB / 8.2MB    0B / 213kB       189
+29cb889b1a2f   agents-customers-tickets-mysql-1      6.39%     520.3MiB / 2GiB     25.41%    9.39MB / 10.1MB   65.4MB / 510MB   246
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 7 of 10 at 2026-03-15 15:26:08 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2093
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 130
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 319 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2114
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 129
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 318 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:41 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.719MiB / 25MiB    18.88%    17.1MB / 17.1MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.24%     480.2MiB / 1GiB     46.89%    10.3MB / 9.46MB   0B / 238kB       129
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.26%     495.1MiB / 1GiB     48.34%    10.3MB / 9.53MB   0B / 238kB       188
+29cb889b1a2f   agents-customers-tickets-mysql-1      1.45%     520.8MiB / 2GiB     25.43%    10.9MB / 11.7MB   65.4MB / 546MB   246
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 8 of 10 at 2026-03-15 15:26:51 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2272
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 130
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 319 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2237
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 131
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 320 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:40 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    19.5MB / 19.5MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.28%     496.9MiB / 1GiB     48.53%    11.8MB / 10.8MB   0B / 250kB       131
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.28%     504MiB / 1GiB       49.22%    11.7MB / 10.9MB   0B / 250kB       189
+29cb889b1a2f   agents-customers-tickets-mysql-1      2.70%     521.2MiB / 2GiB     25.45%    12.4MB / 13.3MB   65.4MB / 581MB   246
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 9 of 10 at 2026-03-15 15:27:33 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2360
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 132
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 321 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2270
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 130
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 319 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:40 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.719MiB / 25MiB    18.88%    21.9MB / 22MB     0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.21%     510.2MiB / 1GiB     49.82%    13.2MB / 12.1MB   0B / 262kB       130
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.17%     514MiB / 1GiB       50.20%    13.2MB / 12.2MB   0B / 262kB       189
+29cb889b1a2f   agents-customers-tickets-mysql-1      1.69%     522.6MiB / 2GiB     25.52%    13.8MB / 14.9MB   65.4MB / 616MB   250
+
+Done.
+
+
+====================================================================================
+Starting smoke test iteration 10 of 10 at 2026-03-15 15:28:17 ...
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2355
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 137
+      1 java            java -jar /app/app.jar
+  java threads (approx): 189
+  TOTAL java threads (approx): 326 (across 2 replicas)
+
+============================
+Runtime snapshot
+============================
+
+[nginx] container: agents-customers-tickets-nginx-1
+tcp connections: 2312
+
+[app] replicas thread counts (approx)
+      1 java            java -jar /app/app.jar
+  java threads (approx): 136
+      1 java            java -jar /app/app.jar
+  java threads (approx): 188
+  TOTAL java threads (approx): 324 (across 2 replicas)
+
+============================
+Customer count: 200
+Tickets per customer: 5
+Elapsed time: 00:39 (mm:ss)
+Created users: 201
+Created tickets: 1000
+============================
+
+Docker container stats:
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O        PIDS
+74b5adcf0eea   agents-customers-tickets-nginx-1      0.00%     4.715MiB / 25MiB    18.86%    24.4MB / 24.4MB   0B / 8.19kB      6
+72be54c489a9   agents-customers-tickets-app_lb_1-1   0.26%     525.4MiB / 1GiB     51.31%    14.7MB / 13.4MB   0B / 287kB       136
+99bda8733337   agents-customers-tickets-app_lb_2-1   0.25%     531.5MiB / 1GiB     51.91%    14.6MB / 13.5MB   0B / 287kB       188
+29cb889b1a2f   agents-customers-tickets-mysql-1      1.84%     523.5MiB / 2GiB     25.56%    15.3MB / 16.5MB   65.4MB / 651MB   254
+
+Done.

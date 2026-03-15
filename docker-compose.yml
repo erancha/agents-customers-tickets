@@ -25,6 +25,7 @@ x-shared-app-env: &shared-app-env
   <<: [*shared-db-env, *shared-integration-env, *shared-runtime-env, *shared-cdc-env]
   USERS_INTEGRATION_MODE: ${USERS_INTEGRATION_MODE:-embedded}
   KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
+  JAVA_TOOL_OPTIONS: ${APP_JAVA_TOOL_OPTIONS:--Xms256m -Xmx512m}
   WS_BROKER_RELAY_ENABLED: ${WS_BROKER_RELAY_ENABLED:-false}
   WS_BROKER_RELAY_HOST: ${WS_BROKER_RELAY_HOST:-rabbitmq}
   WS_BROKER_RELAY_PORT: ${WS_BROKER_RELAY_PORT:-61613}
@@ -41,6 +42,7 @@ x-shared-app-base: &shared-app-base
     context: .
     dockerfile: Dockerfile
   image: agents-customers-tickets:local
+  mem_limit: ${APP_MEM_LIMIT:-1g}
   depends_on:
     mysql:
       condition: service_healthy
@@ -53,12 +55,14 @@ x-shared-app-base: &shared-app-base
 services:
   mysql:
     image: mysql:8.4
+    mem_limit: ${NGINX_MEM_LIMIT:-2g}
     command:
       - --server-id=1
       - --log-bin=mysql-bin
       - --binlog-format=ROW
       - --binlog-row-image=FULL
       - --binlog-expire-logs-seconds=86400
+      - --max_connections=750 # docker compose exec mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'max_connections';" "SHOW VARIABLES LIKE 'max_connections';"
     environment:
       MYSQL_DATABASE: agentscustomerstickets_db
       MYSQL_USER: agentscustomerstickets
@@ -149,11 +153,26 @@ services:
       <<: *shared-app-env
       APP_INSTANCE: lb_2
 
+  # app_lb_3:
+  #   <<: *shared-app-base
+  #   environment:
+  #     <<: *shared-app-env
+  #     APP_INSTANCE: lb_3
+
+  # app_lb_4:
+  #   <<: *shared-app-base
+  #   environment:
+  #     <<: *shared-app-env
+  #     APP_INSTANCE: lb_4
+
   nginx:
     image: nginx:1.27-alpine
+    mem_limit: ${NGINX_MEM_LIMIT:-25m}
     depends_on:
       - app_lb_1
       - app_lb_2
+      # - app_lb_3
+      # - app_lb_4
     ports:
       - "${APP_PORT:-8080}:80"
     command:
@@ -164,6 +183,8 @@ services:
         upstream app_upstream {
           server app_lb_1:8080;
           server app_lb_2:8080;
+          # server app_lb_3:8080;
+          # server app_lb_4:8080;
         }
 
         server {

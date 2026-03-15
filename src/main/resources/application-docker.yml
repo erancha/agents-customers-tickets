@@ -1,3 +1,10 @@
 users:
   integration:
     base-url: http://users-service:8080
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 150
+      minimum-idle: 10
+      connection-timeout: 30000

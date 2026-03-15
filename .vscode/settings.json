@@ -7,9 +7,9 @@
     "qstep",
     "stompjs"
   ],
-  "editor.rulers": [120],
+  "editor.rulers": [140],
   "editor.wordWrap": "wordWrapColumn",
-  "editor.wordWrapColumn": 120,
+  "editor.wordWrapColumn": 140,
   "java.compile.nullAnalysis.mode": "automatic",
   "java.configuration.updateBuildConfiguration": "interactive"
 }

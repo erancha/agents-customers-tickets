@@ -73,6 +73,6 @@ fi
 "$SCRIPT_DIR/build.sh"
 
 APP_PORT="${APP_PORT:-8080}"
-APP_PORT="$APP_PORT" compose up -d --build mysql app
+APP_PORT="$APP_PORT" compose up -d --build --force-recreate --remove-orphans
 
 echo "Deployed via compose: service=$APP_NAME port=${APP_PORT}->8080"

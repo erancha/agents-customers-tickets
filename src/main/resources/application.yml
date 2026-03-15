@@ -11,6 +11,7 @@ spring:
     password: ${DB_PASSWORD:agentscustomerstickets123}
 
   jpa:
+    open-in-view: false # Disable open-in-view to prevent lazy loading during REST serialization (best practice for REST APIs); This ensures hidden database queries won't occur during JSON serialization in your REST endpoints.
     hibernate:
       ddl-auto: update
     properties:
