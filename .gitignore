@@ -2,3 +2,6 @@ target/
 .idea/
 /README-learning.md
 node_modules
+scripts/smoke-test-jmeter.log
+scripts/smoke-test-jmeter.jtl
+jmeter.log
