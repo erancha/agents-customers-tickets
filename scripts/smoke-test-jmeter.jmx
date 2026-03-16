@@ -49,11 +49,11 @@
           </elementProp>
           <elementProp name="NUM_CUSTOMERS" elementType="Argument">
             <stringProp name="Argument.name">NUM_CUSTOMERS</stringProp>
-            <stringProp name="Argument.value">200</stringProp>
+            <stringProp name="Argument.value">500</stringProp>
           </elementProp>
           <elementProp name="TICKETS_PER_CUSTOMER" elementType="Argument">
             <stringProp name="Argument.name">TICKETS_PER_CUSTOMER</stringProp>
-            <stringProp name="Argument.value">500</stringProp>
+            <stringProp name="Argument.value">2000</stringProp>
           </elementProp>
         </collectionProp>
       </elementProp>
