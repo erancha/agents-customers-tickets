@@ -69,7 +69,7 @@ fi
 
 if [[ $compose_up -eq 1 || $compose_down -eq 1 ]]; then # to ensure the services are up before the test if either -cu or -cd was passed
   echo "Running 'docker compose up -d' ..."
-  docker compose up -d || { echo "docker compose up -d failed" >&2; exit 1; }
+  SPRING_PROFILES_ACTIVE=docker,test docker compose up -d || { echo "docker compose up -d failed" >&2; exit 1; }
   echo "Waiting 60 seconds for services to start..."
   sleep 60
 fi

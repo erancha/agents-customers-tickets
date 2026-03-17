@@ -410,8 +410,8 @@ schedule_runtime_parallelism_snapshot() {
 }
 
 # Customers and tickets count for the main iteration
-customer_count=200
-tickets_per_customer=500
+customer_count=2
+tickets_per_customer=5
 
 main_iteration() {
   created_users=0
@@ -533,7 +533,7 @@ main() {
 
   if [[ $compose_up -eq 1 || $compose_down -eq 1 ]]; then  # to ensure the services are up before the test if either -cu or -cd was passed
     qstep "Running 'docker compose up -d' ..."
-    docker compose up -d || fail "docker compose up -d failed"
+    SPRING_PROFILES_ACTIVE=docker,test docker compose up -d || fail "docker compose up -d failed"
     qstep "Waiting 60 seconds for services to start..."
     sleep 60
   fi

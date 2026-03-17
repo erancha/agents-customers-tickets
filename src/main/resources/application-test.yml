@@ -1,0 +1,3 @@
+security:
+  jwt:
+    accessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:240}

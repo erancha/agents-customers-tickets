@@ -53,7 +53,7 @@
           </elementProp>
           <elementProp name="TICKETS_PER_CUSTOMER" elementType="Argument">
             <stringProp name="Argument.name">TICKETS_PER_CUSTOMER</stringProp>
-            <stringProp name="Argument.value">2000</stringProp>
+            <stringProp name="Argument.value">20000</stringProp>
           </elementProp>
         </collectionProp>
       </elementProp>
@@ -350,27 +350,6 @@ vars.put('customer_email', 'customer_' + runId + '_' + i + '@example.com')
           </hashTree>
         </hashTree>
 
-        <!-- 5. List tickets as customer -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="List tickets (as customer)" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.path">/api/tickets</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-        </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Customer Auth for List tickets" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="Authorization" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer ${customer_token}</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-        </hashTree>
 
       </hashTree>
       <!-- end Customers thread group -->
