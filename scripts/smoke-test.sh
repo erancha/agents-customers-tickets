@@ -460,7 +460,8 @@ main_iteration() {
   # Prepare temp files for counters
   users_counter_dir="/tmp/smoke-test-users-$$"
   tickets_counter_dir="/tmp/smoke-test-tickets-$$"
-  mkdir -p "$users_counter_dir" "$tickets_counter_dir"
+  customers_ids_dir="/tmp/smoke-test-customer-ids-$$"
+  mkdir -p "$users_counter_dir" "$tickets_counter_dir" "$customers_ids_dir"
 
   for i in $(seq 1 "$customer_count"); do
     (
@@ -469,6 +470,7 @@ main_iteration() {
       local cid
       cid=$(create_customer_for_agent "$agent_token" "$username" "$email")
       echo 1 > "$users_counter_dir/user_$i"
+      echo "$cid" > "$customers_ids_dir/customer_$i"
 
       qstep "Getting customer #${i} JWT..."
       local ctoken
@@ -501,7 +503,11 @@ main_iteration() {
   for f in "$tickets_counter_dir"/tickets_*; do
     [ -f "$f" ] && created_tickets=$((created_tickets + $(cat "$f")))
   done
-  rm -rf "$users_counter_dir" "$tickets_counter_dir"
+  customers_ids=()
+  for i in $(seq 1 "$customer_count"); do
+    customers_ids+=("$(cat "$customers_ids_dir/customer_$i")")
+  done
+  rm -rf "$users_counter_dir" "$tickets_counter_dir" "$customers_ids_dir"
 
   qstep "Listing customers of the agent..."
   if [[ $quiet -eq 0 ]]; then json_get "$BASE_URL/api/customers" "$agent_token"; fi
