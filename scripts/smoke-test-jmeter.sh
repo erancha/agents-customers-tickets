@@ -83,7 +83,7 @@ echo "Running JMeter smoke test: $JMX_FILE"
 
 if [[ $compose_down -eq 1 ]]; then
   echo "Running 'docker compose down --volumes' ..."
-  docker compose down --volumes || { echo "docker compose down --volumes failed" >&2; exit 1; }
+  docker compose "${compose_args[@]}" down --volumes || { echo "docker compose down --volumes failed" >&2; exit 1; }
 fi
 
 if [[ $compose_up -eq 1 || $compose_down -eq 1 ]]; then # to ensure the services are up before the test if either -cu or -cd was passed
