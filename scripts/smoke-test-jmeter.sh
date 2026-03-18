@@ -4,11 +4,13 @@ set -euo pipefail
 
 #############################################################################################################
 # Minimal JMeter smoke test runner
-# Usage: ./smoke-test-jmeter.sh [-cu|--compose-up] [-cd|--compose-down] [jmeter-args]
+# Usage: ./smoke-test-jmeter.sh [-cu|--compose-up] [-cd|--compose-down] [-rc|--remote-cache] [-l|--long] [jmeter-args]
 # The number of threads and iterations are set in the .jmx file.
 #
 #   -cd, --compose-down   Run 'docker compose down --volumes' before the test
 #   -cu, --compose-up     Run 'docker compose up -d' before the test
+#   -rc, --remote-cache   Use SPRING_PROFILES_ACTIVE=remote-cache when compose startup is triggered
+#   -l, --long            Use the larger predefined JMeter customer and ticket counts
 #############################################################################################################
 
 JMETER_BIN="${JMETER_BIN:-jmeter}"
@@ -37,9 +39,11 @@ if [[ -f "$LOG4J2_CONFIG_FILE" ]]; then
   export JMETER_OPTS="${JMETER_OPTS:-} -Dlog4j2.configurationFile=$LOG4J2_CONFIG_FILE"
 fi
 
-# Parse args for --compose-up/-cu and --compose-down/-cd
+# Parse args:
 compose_up=0
 compose_down=0
+remote_cache=0
+long_mode=0
 args=()
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -51,13 +55,28 @@ while [[ $# -gt 0 ]]; do
       compose_down=1
       shift
       ;;
+    -rc|--remote-cache)
+      remote_cache=1
+      shift
+      ;;
+    -l|--long)
+      long_mode=1
+      shift
+      ;;
     *)
       args+=("$1")
       shift
       ;;
   esac
 done
+
 set -- "${args[@]}"
+spring_profiles="docker,test"
+compose_args=()
+if [[ $remote_cache -eq 1 ]]; then
+  spring_profiles="$spring_profiles,remote-cache"
+  compose_args=(--profile remote-cache)
+fi
 
 echo "Running JMeter smoke test: $JMX_FILE"
 
@@ -69,7 +88,7 @@ fi
 
 if [[ $compose_up -eq 1 || $compose_down -eq 1 ]]; then # to ensure the services are up before the test if either -cu or -cd was passed
   echo "Running 'docker compose up -d' ..."
-  SPRING_PROFILES_ACTIVE=docker,test docker compose up -d || { echo "docker compose up -d failed" >&2; exit 1; }
+  SPRING_PROFILES_ACTIVE="$spring_profiles" docker compose "${compose_args[@]}" up -d || { echo "docker compose up -d failed" >&2; exit 1; }
   echo "Waiting 60 seconds for services to start..."
   sleep 60
 fi
@@ -82,6 +101,12 @@ fi
 if [[ ! -f "$JMX_FILE" ]]; then
   echo "ERROR: JMeter test plan not found: $JMX_FILE" >&2
   exit 1
+fi
+
+
+# If --long was passed, override NUM_CUSTOMERS and TICKETS_PER_CUSTOMER
+if [[ $long_mode -eq 1 ]]; then
+  set -- -JNUM_CUSTOMERS=500 -JTICKETS_PER_CUSTOMER=2000 "$@"
 fi
 
 "$JMETER_BIN" -n -t "$JMX_FILE" -l "$RESULTS_FILE" -j "$JMETER_LOG_FILE" \

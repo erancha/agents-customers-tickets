@@ -22,8 +22,15 @@ x-shared-restart-policy: &shared-restart-policy
       window: 30s
 
 x-shared-app-env: &shared-app-env
-  <<: [*shared-db-env, *shared-integration-env, *shared-runtime-env, *shared-cdc-env]
+  <<:
+    [
+      *shared-db-env,
+      *shared-integration-env,
+      *shared-runtime-env,
+      *shared-cdc-env,
+    ]
   USERS_INTEGRATION_MODE: ${USERS_INTEGRATION_MODE:-embedded}
+  SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST:-redis}
   KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
   JAVA_TOOL_OPTIONS: ${APP_JAVA_TOOL_OPTIONS:--Xms256m -Xmx512m}
   WS_BROKER_RELAY_ENABLED: ${WS_BROKER_RELAY_ENABLED:-false}
@@ -46,6 +53,9 @@ x-shared-app-base: &shared-app-base
   depends_on:
     mysql:
       condition: service_healthy
+    redis:
+      condition: service_healthy
+      required: false
     debezium:
       condition: service_started
       required: false
@@ -53,6 +63,28 @@ x-shared-app-base: &shared-app-base
     <<: *shared-app-env
 
 services:
+  redis:
+    profiles: ["remote-cache"]
+    image: redis:7-alpine
+    mem_limit: ${REDIS_MEM_LIMIT:-64m}
+    command:
+      [
+        "redis-server",
+        "--maxmemory",
+        "8mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   mysql:
     image: mysql:8.4
     mem_limit: ${NGINX_MEM_LIMIT:-2g}
@@ -251,6 +283,7 @@ services:
       - "${USERS_SERVICE_PORT:-8081}:8080"
 
 volumes:
+  redis_data: # Persist Redis data between restarts.
   mysql_data: # Persist MySQL data between restarts.
   debezium_data: # Persist Debezium offsets between restarts.
   redpanda_data: # Persist Redpanda data between restarts.

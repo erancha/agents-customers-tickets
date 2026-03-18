@@ -8,15 +8,17 @@ set -euo pipefail
 #   -i, --iterations N    Run the test logic N times (default: 1)
 #   -cu, --compose-up     Run 'docker compose up -d' before tests
 #   -cd, --compose-down   Run 'docker compose down --volumes' after the test
+#   -rc, --remote-cache   Use SPRING_PROFILES_ACTIVE=remote-cache when compose startup is triggered
 #
 # Example usage:
-#   ./scripts/smoke-test.sh -q -cd -cu -i 3 >> 200-customers-x-5-tickets--2-replicas--3-iterations.out
+#   ./scripts/smoke-test.sh -q -cd -cu -rc -i 3 >> 200-customers-x-5-tickets--2-replicas--3-iterations.out
 #############################################################################################################
 
-# Parse args for --quiet/-q, --compose-up/-cu, --compose-down/-cd, and --iterations/-i
+# Parse args:
 quiet=0
 compose_up=0
 compose_down=0
+remote_cache=0
 iterations=1
 args=()
 while [[ $# -gt 0 ]]; do
@@ -31,6 +33,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -cd|--compose-down)
       compose_down=1
+      shift
+      ;;
+    -rc|--remote-cache)
+      remote_cache=1
       shift
       ;;
     -i|--iterations)
@@ -295,6 +301,13 @@ create_customer_for_agent() {
 qecho() { if [[ $quiet -eq 0 ]]; then echo "$@"; fi; }
 qstep() { if [[ $quiet -eq 0 ]]; then step "$@"; fi; }
 
+spring_profiles="docker,test"
+compose_args=()
+if [[ $remote_cache -eq 1 ]]; then
+  spring_profiles="$spring_profiles,remote-cache"
+  compose_args=(--profile remote-cache)
+fi
+
 
 # Always print summary/stats, even on error
 print_summary() {
@@ -539,7 +552,7 @@ main() {
 
   if [[ $compose_up -eq 1 || $compose_down -eq 1 ]]; then  # to ensure the services are up before the test if either -cu or -cd was passed
     qstep "Running 'docker compose up -d' ..."
-    SPRING_PROFILES_ACTIVE=docker,test docker compose up -d || fail "docker compose up -d failed"
+    SPRING_PROFILES_ACTIVE="$spring_profiles" docker compose "${compose_args[@]}" up -d || fail "docker compose up -d failed"
     qstep "Waiting 60 seconds for services to start..."
     sleep 60
   fi

@@ -11,5 +11,7 @@
   "editor.wordWrap": "wordWrapColumn",
   "editor.wordWrapColumn": 140,
   "java.compile.nullAnalysis.mode": "automatic",
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.format.settings.url": ".vscode/java-formatter.xml",
+  "java.format.settings.profile": "agents-customers-tickets"
 }

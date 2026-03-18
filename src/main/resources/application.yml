@@ -5,10 +5,18 @@ spring:
   application:
     name: agents-customers-tickets
 
+  # profiles:
+  #   active: remote-cache
+
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/agentscustomerstickets_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:agentscustomerstickets}
     password: ${DB_PASSWORD:agentscustomerstickets123}
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
   jpa:
     open-in-view: false # Disable open-in-view to prevent lazy loading during REST serialization (best practice for REST APIs); This ensures hidden database queries won't occur during JSON serialization in your REST endpoints.

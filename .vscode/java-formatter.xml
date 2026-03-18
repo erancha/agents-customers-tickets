@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<profiles version="1">
+  <profile kind="CodeFormatterProfile" name="agents-customers-tickets" version="22">
+    <setting id="org.eclipse.jdt.core.formatter.lineSplit" value="140"/>
+    <setting id="org.eclipse.jdt.core.formatter.comment.line_length" value="140"/>
+    <setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="true"/>
+    <setting id="org.eclipse.jdt.core.formatter.join_lines_in_comments" value="true"/>
+    <setting id="org.eclipse.jdt.core.formatter.tabulation.char" value="space"/>
+    <setting id="org.eclipse.jdt.core.formatter.tabulation.size" value="3"/>
+    <setting id="org.eclipse.jdt.core.formatter.indentation.size" value="3"/>
+    <setting id="org.eclipse.jdt.core.formatter.comment.format_javadoc_comments" value="true"/>
+    <setting id="org.eclipse.jdt.core.formatter.comment.format_block_comments" value="true"/>
+    <setting id="org.eclipse.jdt.core.formatter.comment.format_line_comments" value="true"/>
+  </profile>
+</profiles>

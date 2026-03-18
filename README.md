@@ -28,8 +28,8 @@ See [Appendix: Phase 2 Users Internal Microservice](#appendix-phase-2-users-inte
 ## Development
 
 ```bash
-# Start only MySQL
-docker compose up -d mysql
+# Start MySQL and Redis (when remote-cache is enabled)
+docker compose up -d mysql redis
 
 # Build the application
 ./scripts/build.sh # --run, --help
@@ -37,6 +37,11 @@ docker compose up -d mysql
 # Run the application service
 java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
 ```
+
+- By default, the application starts with remote cache (redis-backed) disabled.
+- The optional remote cache is enabled by activating the `remote-cache` Spring profile.
+- For a local run without cache, start `mysql` and `./scripts/build.sh --run` or `java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar`.
+- For a local run with remote cache, start `mysql` and `redis`, then prefix `SPRING_PROFILES_ACTIVE=remote-cache` before the commands above.
 
 ## Deployment
 
@@ -50,13 +55,17 @@ docker compose up -d
 docker compose up -d --build --force-recreate
 ```
 
+- By default, the Docker Compose deployment starts with remote cache disabled unless `SPRING_PROFILES_ACTIVE` includes `remote-cache`.
+- To enable remote cache in Docker Compose, ensure `redis` is running and set `SPRING_PROFILES_ACTIVE=docker,remote-cache` when starting the stack.
+- Example: `SPRING_PROFILES_ACTIVE=docker,remote-cache docker compose up -d --build --force-recreate`
+
 The application service listens on `http://localhost:8080`.
 
 ## Scripts
 
 - `./scripts/build.sh` (builds the application and runs unit/integration tests)
 - `./scripts/deploy.sh`
-- `./scripts/smoke-test.sh` (end-to-end smoke test; run while the service is up)
+- `./scripts/smoke-test*.sh` (end-to-end smoke test)
 - `./scripts/websocket-test.sh` (connects as admin to websocket and prints pushed admin events)
 - `./scripts/undeploy.sh`
 - `./scripts/clean.sh`
