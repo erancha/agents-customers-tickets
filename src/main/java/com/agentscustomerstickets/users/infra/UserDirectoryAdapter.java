@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Infrastructure adapter that implements UserDirectory using the users persistence layer.
- *
  * Maps UserEntity records into API-facing User DTOs for read operations.
  */
 @Component

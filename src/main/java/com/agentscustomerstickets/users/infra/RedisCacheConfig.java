@@ -1,12 +1,10 @@
 
 /**
  * Redis cache configuration for user data.
- *
  * Activation: Only active when the remote-cache Spring profile is enabled.
- *
  * Usage: Provides a Redis-backed CacheManager bean for Spring's caching abstraction, with a 30-minute TTL and JSON serialization for cache values.
- *
- * Consumers: Application code does not use this class directly. It is used by Spring's caching infrastructure to support @Cacheable, @CacheEvict, etc. in adapters such as UserDirectoryAdapter and UserManagementAdapter (see USERS_CACHE).
+ * Consumers: Application code does not use this class directly. It is used by Spring's caching infrastructure to support @Cacheable, @CacheEvict, etc. 
+ * in adapters such as UserDirectoryAdapter and UserManagementAdapter (see USERS_CACHE).
  */
 package com.agentscustomerstickets.users.infra;
 

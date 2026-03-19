@@ -117,12 +117,17 @@ fi
 JAR_FILE="$(find "target" -maxdepth 1 -type f -name "*.jar" ! -name "*.original" | head -n 1)"
 [[ -n "$JAR_FILE" ]] || fail "No runnable JAR found in target/."
 
+# Allow custom JVM options for profiling (e.g., JMX, Flight Recorder) via APP_JAVA_TOOL_OPTIONS
+JAVA_TOOL_OPTIONS="${APP_JAVA_TOOL_OPTIONS:-$JAVA_TOOL_OPTIONS}"
+
 if [[ "$USERS_MS_MODE" == "1" ]]; then
   echo "Running in remote users-service mode. Ensure users-service is available at $USERS_MS_URL"
   USERS_INTEGRATION_MODE=remote \
   USERS_INTEGRATION_BASE_URL="$USERS_MS_URL" \
   USERS_INTEGRATION_INTERNAL_API_KEY="$USERS_MS_KEY" \
+  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS" \
   java -jar "$JAR_FILE"
 else
+  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS" \
   java -jar "$JAR_FILE"
 fi

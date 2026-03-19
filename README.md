@@ -43,6 +43,16 @@ java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar
 - For a local run without cache, start `mysql` and `./scripts/build.sh --run` or `java -jar target/agents-customers-tickets-0.0.1-SNAPSHOT.jar`.
 - For a local run with remote cache, start `mysql` and `redis`, then prefix `SPRING_PROFILES_ACTIVE=remote-cache` before the commands above.
 
+## Profiling
+
+```bash
+./scripts/profile.sh
+```
+
+- Runs a local profiling flow with Java Flight Recorder (JFR): starts required infrastructure, builds the app, runs the JAR, starts JFR, executes `scripts/smoke-test-jmeter.sh`, stops JFR, and saves a `.jfr` recording under `profiling/`.
+- At the end of the run, the script reuses `jmc` if it is already installed; otherwise it downloads a local JDK Mission Control copy under your WSL home directory and starts JMC automatically when a GUI session is available. The script prints the generated recording path so you can open it from `File -> Open File...` inside JMC. In JMC, inspect `Method Profiling` for hot methods, `Call Tree` or `Flame View` for expensive paths, `Threads` for blocked or waiting activity, `Lock Instances` for contention, and `Memory` or `Garbage Collections` for allocation and GC pressure.
+- To print the script usage and available options: `./scripts/profile.sh --help`
+
 ## Deployment
 
 With [docker-compose.yml](docker-compose.yml):

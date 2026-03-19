@@ -5,3 +5,5 @@ node_modules
 scripts/smoke-test-jmeter.log
 scripts/smoke-test-jmeter.jtl
 jmeter.log
+.tools/downloads/org.openjdk.jmc-9.1.1-linux.gtk.x86_64.tar.gz
+.tools/jmc/JDK Mission Control/
