@@ -115,84 +115,94 @@
   <path class="arrow" d="M 809.032 598.992 L 749.383 598.134" style=""/>
   <path class="arrow" d="M 445.83 608.348 L 516.119 580.203" style="transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-0.935472, -0.353401, 0.353401, -0.935472, 0.000025, 0.000051)"/>
   <path class="arrow" d="M 234.454 600.708 C 58.854 600.708 -110.47 467.667 -217.09 227.954" style="stroke-width: 2.3;"/>
-  <rect x="357.542" y="798.382" width="813.538" height="40.239" rx="12" fill="#e8f2ff" stroke="#9db9d9" style="stroke-width: 1;"/>
-  <text class="layer" style="white-space: pre; font-size: 13px;" x="372.494" y="821.287">Entry / HTTP Layer</text>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/admin/events" target="_blank" transform="matrix(1, 0, 0, 1, 511.926056, 672.173889)">
+  <rect x="80.033" y="796.73" width="813.538" height="40.239" rx="12" fill="#e8f2ff" stroke="#9db9d9" style="stroke-width: 1;"/>
+  <text class="layer" style="white-space: pre; font-size: 13px;" x="94.985" y="819.635">Entry / HTTP Layer</text>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/admin/events" target="_blank" transform="matrix(1, 0, 0, 1, 234.416473, 670.522034)">
     <rect x="-174.32" y="217.468" width="196.59" height="68.391" rx="12" fill="#eef3ff" stroke="#7e96d8" stroke-width="2" style=""/>
     <text class="box-title" x="-165.046" y="235.975" style="white-space: pre; font-size: 15px;">Admin Events</text>
     <text class="box-title" x="-165.046" y="260.975" style="white-space: pre; font-size: 15px;">(Kafka consumer</text>
     <text class="box-title" x="-165.046" y="275.975" style="white-space: pre; font-size: 15px;">+ WebSocket push)</text>
   </a>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/agents/web" target="_blank" transform="matrix(1, 0, 0, 1, 373.529205, 685.888855)">
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/agents/web" target="_blank" transform="matrix(1, 0, 0, 1, 96.019638, 684.237)">
     <rect x="178.916" y="205" width="119.084" height="45.898" rx="12" fill="#eaf7ff" stroke="#72b6e5" stroke-width="2" style=""/>
     <text class="box-title" x="185.695" y="233.753" style="white-space: pre; font-size: 15px;">Agents Module</text>
   </a>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/customers" target="_blank" transform="matrix(1, 0, 0, 1, 268.796478, 687.135681)">
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/customers" target="_blank" transform="matrix(1, 0, 0, 1, -8.713093, 685.483826)">
     <rect x="423.499" y="205" width="151.501" height="43.301" rx="12" fill="#eefcf2" stroke="#7dc99a" stroke-width="2" style=""/>
     <text class="box-title" x="427.784" y="233.753" style="white-space: pre; font-size: 15px;">Customers Module</text>
   </a>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/tickets" target="_blank" transform="matrix(1, 0, 0, 1, 3.224206, 688.382507)">
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/tickets" target="_blank" transform="matrix(1, 0, 0, 1, -274.28537, 686.730652)">
     <rect x="868.819" y="208.74" width="122.825" height="38.21" rx="12" fill="#fff8eb" stroke="#e4bb72" stroke-width="2" style=""/>
     <text class="box-title" x="874.351" y="232.507" style="white-space: pre; font-size: 15px;">Tickets Module</text>
   </a>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/users" target="_blank" transform="matrix(1, 0, 0, 1, 4.271966, 684.191467)">
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/users" target="_blank" transform="matrix(1, 0, 0, 1, -273.23761, 682.539612)">
     <rect x="1019.89" y="212.334" width="132.11" height="41.16" rx="12" fill="#fff0f1" stroke="#da8f9a" stroke-width="2" style=""/>
     <text class="box-title" x="1030.41" y="238.74" style="white-space: pre; font-size: 15px;">Users Module</text>
   </a>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/users/api" target="_blank" transform="matrix(1, 0, 0, 1, 470.847626, 600.147522)">
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/users/api" target="_blank" transform="matrix(1, 0, 0, 1, 193.338058, 598.495667)">
     <rect x="541.689" y="390" width="147.383" height="48.09" rx="12" fill="#fdeff4" stroke="#da8f9a" stroke-width="2" style=""/>
     <text class="box-title" x="568.953" y="418.856" style="white-space: pre; font-size: 15px;">Users API</text>
   </a>
-  <rect x="718.302" y="1063.29" width="439.489" height="83.092" rx="12" fill="#ffffff" stroke="#9fb0bf" stroke-width="2" style="stroke-width: 2;"/>
-  <text class="layer" x="41.791" y="1170.56" style="white-space: pre; font-size: 13px; stroke-width: 1;"> </text>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/shared" target="_blank" transform="matrix(1, 0, 0, 1, 472.927673, 518.510193)">
+  <rect x="440.793" y="1061.64" width="439.489" height="83.092" rx="12" fill="#ffffff" stroke="#9fb0bf" stroke-width="2" style="stroke-width: 2;"/>
+  <text class="layer" x="-235.72" y="1168.91" style="white-space: pre; font-size: 13px; stroke-width: 1;"> </text>
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/shared" target="_blank" transform="matrix(1, 0, 0, 1, 195.418106, 516.858337)">
     <rect x="269.645" y="565.239" width="131.403" height="42.873" rx="12" fill="#f6f0ff" stroke="#a994d4" stroke-width="2" style=""/>
     <text class="box-title" x="277.167" y="588.952" style="white-space: pre; font-size: 15px;">Shared Concerns</text>
   </a>
-  <a class="link" href="../src/main/resources/application.yml" target="_blank" transform="matrix(1, 0, 0, 1, 250.946304, 520.41571)">
+  <a class="link" href="../src/main/resources/application.yml" target="_blank" transform="matrix(1, 0, 0, 1, -26.563265, 518.763855)">
     <rect x="640.122" y="564.191" width="119.878" height="40.776" rx="12" fill="#e9f7ff" stroke="#79aac8" stroke-width="2" style=""/>
     <text class="box-title" x="648.692" y="588.952" style="white-space: pre; font-size: 15px;">Configuration</text>
   </a>
-  <a class="link" href="../src/main/java/com/agentscustomerstickets/tickets/infra" target="_blank" transform="matrix(1, 0, 0, 1, -67.677956, 610.047058)">
+  <a class="link" href="../src/main/java/com/agentscustomerstickets/tickets/infra" target="_blank" transform="matrix(1, 0, 0, 1, -345.187531, 608.395203)">
     <rect x="1093.38" y="473.036" width="98.923" height="44.681" rx="12" fill="#f0fbff" stroke="#79b8d7" stroke-width="2" style=""/>
     <text class="box-title" x="1102.99" y="500.94" style="white-space: pre; font-size: 15px;">Persistence</text>
   </a>
-  <a class="link" href="../docker-compose.yml" target="_blank" transform="matrix(1, 0, 0, 1, 404.899933, 440.862854)">
+  <a class="link" href="../docker-compose.yml" target="_blank" transform="matrix(1, 0, 0, 1, 127.390366, 439.210999)">
     <rect x="490.579" y="744" width="273.421" height="71.108" rx="12" fill="#fff2e5" stroke="#dc9b5b" stroke-width="2" style=""/>
     <text class="box-title" x="564.11" y="772.857" style="white-space: pre; font-size: 15px;">MySQL (Docker Compose)</text>
     <text class="box-text" x="501.245" y="799.096" style="white-space: pre; font-size: 12px;">Database is accessed through Persistence only</text>
   </a>
-  <a class="link" href="../config/debezium/application.properties" target="_blank" transform="matrix(1, 0, 0, 1, 171.748795, 439.692596)">
+  <a class="link" href="../config/debezium/application.properties" target="_blank" transform="matrix(1, 0, 0, 1, -105.76078, 438.040741)">
     <rect x="434" y="744" width="228" height="71.108" rx="12" fill="#fff7ea" stroke="#d9b06d" stroke-width="2" style=""/>
     <text class="box-title" x="452" y="776" style="white-space: pre;">Debezium Server</text>
     <text class="box-text" x="452" y="797" style="white-space: pre;">MySQL CDC connector and sink</text>
   </a>
-  <a class="link" href="../docker-compose.yml" target="_blank" transform="matrix(1, 0, 0, 1, -114.571091, 442.835876)">
+  <a class="link" href="../docker-compose.yml" target="_blank" transform="matrix(1, 0, 0, 1, -392.080658, 441.184021)">
     <rect x="434" y="744" width="208" height="71.108" rx="12" fill="#ecf7ff" stroke="#7faecd" stroke-width="2" style=""/>
     <text class="box-title" x="452" y="776" style="white-space: pre;">Kafka / Redpanda</text>
     <text class="box-text" x="452" y="797" style="white-space: pre;">CDC topics for consumers</text>
   </a>
-  <path class="arrow" d="M 781.137 844.708 L 781.137 892.135" style="stroke-width: 2.3;"/>
-  <path class="arrow" d="M 938.443 848.449 L 938.443 895.876" style="stroke-width: 2.3;"/>
-  <path class="arrow" d="M 1081.81 847.202 L 1081.81 894.629" style="stroke-width: 2.3;"/>
-  <path class="arrow" d="M 1071.21 948.824 L 1098.51 984.229" style="stroke-width: 2.3; transform-origin: 1084.85px 966.527px;" transform="matrix(-0.783764, -0.621059, 0.621059, -0.783764, -0.000024, 0.000059)"/>
-  <path class="arrow" d="M 1071.94 1182.57 L 1072.4 1126.05" style="stroke-width: 2.3; transform-origin: 1072.17px 1154.32px;" transform="matrix(-1, 0, 0, -1, 0.000031, 0.000077)"/>
-  <path class="arrow" d="M 613.857 847.202 L 613.857 889.642" style="stroke-width: 2.3;"/>
-  <path class="arrow" d="M 455.705 864.494 L 455.705 899.386" style="stroke-width: 2.3;"/>
-  <path class="arrow" d="M 456.035 885.967 L 456.562 842.55" style="stroke-width: 2.3; transform-origin: 456.302px 864.259px;"/>
-  <path class="arrow" d="M 893.509 1219.58 L 833.86 1218.73" style="stroke-width: 2.3;"/>
-  <path class="arrow" d="M 529.26 1228.94 L 599.549 1200.79" style="stroke-width: 2.3; transform-origin: 564.404px 1214.87px;" transform="matrix(-0.935472, -0.353401, 0.353401, -0.935472, 0.000032, 0.000016)"/>
-  <path class="arrow" d="M 447.235 959.971 C 441.739 963.44 451.487 1050.87 401.703 1183.59" style="stroke-width: 2.3; transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-1, 0, 0, -1, -0.000041, 0.00004)"/>
-  <rect x="14.104" y="898.348" width="255.056" height="105.698" rx="12" fill="#f7f3ff" stroke="#b48be0" stroke-width="2" style=""/>
-  <text class="box-title" x="25.8" y="926.696" style="font-size: 15px; fill: rgb(107, 63, 160); white-space: pre;">RabbitMQ (STOMP Broker Relay)</text>
-  <text class="box-text" x="29.823" y="953.442" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">Fans out admin events</text>
-  <text class="box-text" x="28.963" y="968.442" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">to all connected replicas</text>
-  <text class="box-text" x="29.823" y="985.162" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">via STOMP relay</text>
-  <path class="arrow" d="M 273.246 956.164 L 337.079 930.606" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: 305.162px 943.385px;"/>
-  <rect x="312.463" y="774.883" width="876.405" height="384.847" rx="12" style="stroke-linecap: square; fill: rgb(180, 235, 190); fill-opacity: 0.18; stroke-width: 10px; stroke-opacity: 0.55; stroke: rgb(34, 139, 34);"/>
-  <rect x="293.597" y="757.595" width="878.5" height="395.325" rx="12" style="stroke-linecap: square; fill: rgb(180, 235, 190); fill-opacity: 0.18; stroke-width: 10; stroke-opacity: 0.55; stroke: rgb(34, 139, 34); opacity: 0.28;"/>
-  <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="115.721" y="940.589"> </text>
-  <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="55.998" y="714.273"> </text>
-  <text style="fill: rgb(34, 139, 34); font-family: Arial, sans-serif; font-size: 25px; white-space: pre;" x="290.868" y="740.52">Application replicas (modular monolith or specific microservices)</text>
-  <path class="arrow" d="M 320.718 936.775 L 268.399 956.816" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: 22.249px 1116.72px;"/>
+  <path class="arrow" d="M 503.628 843.056 L 503.628 890.483" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 660.934 846.797 L 660.934 894.224" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 804.301 845.55 L 804.301 892.977" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 793.7 947.172 L 821 982.577" style="stroke-width: 2.3; transform-origin: 807.34px 964.875px;" transform="matrix(-0.783764, -0.621059, 0.621059, -0.783764, -0.000032, 0.000073)"/>
+  <path class="arrow" d="M 794.431 1180.92 L 794.891 1124.4" style="stroke-width: 2.3; transform-origin: 794.661px 1152.67px;" transform="matrix(-1, 0, 0, -1, 0.000063, -0.000058)"/>
+  <path class="arrow" d="M 336.348 845.55 L 336.348 887.99" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 178.196 862.842 L 178.196 897.734" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 178.526 884.315 L 179.053 840.898" style="stroke-width: 2.3; transform-origin: 178.793px 862.607px;"/>
+  <path class="arrow" d="M 616 1217.93 L 556.351 1217.08" style="stroke-width: 2.3;"/>
+  <path class="arrow" d="M 251.751 1227.29 L 322.04 1199.14" style="stroke-width: 2.3; transform-origin: 286.895px 1213.22px;" transform="matrix(-0.935472, -0.353401, 0.353401, -0.935472, 0.000018, 0.000002)"/>
+  <path class="arrow" d="M 169.726 958.319 C 164.23 961.788 173.978 1049.22 124.194 1181.94" style="stroke-width: 2.3; transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-1, 0, 0, -1, 0.000035, 0.000214)"/>
+  <g transform="matrix(1, 0, 0, 1, -277.509583, -1.651843)">
+    <rect x="14.104" y="898.348" width="255.056" height="105.698" rx="12" fill="#f7f3ff" stroke="#b48be0" stroke-width="2" style=""/>
+    <text class="box-title" x="25.8" y="926.696" style="font-size: 15px; fill: rgb(107, 63, 160); white-space: pre;">RabbitMQ (STOMP Broker Relay)</text>
+    <text class="box-text" x="29.823" y="953.442" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">Fans out admin events</text>
+    <text class="box-text" x="28.963" y="968.442" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">to all connected replicas</text>
+    <text class="box-text" x="29.823" y="985.162" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">via STOMP relay</text>
+    <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="115.721" y="940.589"> </text>
+  </g>
+  <path class="arrow" d="M -4.263 954.512 L 59.57 928.954" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: 27.653px 941.733px;"/>
+  <rect x="34.954" y="773.231" width="876.405" height="384.847" rx="12" style="stroke-linecap: square; fill: rgb(180, 235, 190); fill-opacity: 0.18; stroke-width: 10px; stroke-opacity: 0.55; stroke: rgb(34, 139, 34);"/>
+  <rect x="16.088" y="755.943" width="878.5" height="395.325" rx="12" style="stroke-linecap: square; fill: rgb(180, 235, 190); fill-opacity: 0.18; stroke-width: 10; stroke-opacity: 0.55; stroke: rgb(34, 139, 34); opacity: 0.28;"/>
+  <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="-221.51" y="712.621"> </text>
+  <text style="fill: rgb(34, 139, 34); font-family: Arial, sans-serif; font-size: 25px; white-space: pre;" x="13.359" y="738.868">Application replicas (modular monolith or specific microservices)</text>
+  <path class="arrow" d="M 43.209 935.123 L -9.11 955.164" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: -255.26px 1115.07px;"/>
+  <g transform="matrix(1, 0, 0, 1, 939.898499, -62.77002)">
+    <rect x="14.104" y="898.348" width="114.649" height="67.706" rx="12" fill="#f7f3ff" stroke="#b48be0" stroke-width="2" style=""/>
+    <text class="box-title" x="25.8" y="926.696" style="font-size: 15px; fill: rgb(107, 63, 160); white-space: pre;">Redis</text>
+    <text class="box-text" x="28.171" y="950.473" style="font-size: 12px; fill: rgb(75, 44, 107); white-space: pre;">LRU eviction</text>
+    <text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px;" x="115.721" y="940.589"> </text>
+  </g>
+  <path class="arrow" d="M 933.829 883.626 L 871.604 918.532" style="stroke-width: 2.3; stroke: rgb(180, 139, 224); transform-origin: 547.731px 1131.16px;"/>
+  <path class="arrow" d="M 892.542 908.403 L 954.199 872.28" style="stroke-width: 2.3; stroke: rgb(180, 139, 224);"/>
 </svg>

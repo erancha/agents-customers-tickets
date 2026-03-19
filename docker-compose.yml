@@ -74,7 +74,10 @@ services:
         "8mb",
         "--maxmemory-policy",
         "allkeys-lru",
+        "--save", "",
+        "--appendonly", "no"
       ]
+      # disabled RDB snapshots (--save) and AOF persistence (--appendonly) to ensure Redis operates purely as an in-memory cache.
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
