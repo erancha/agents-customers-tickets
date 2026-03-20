@@ -192,30 +192,30 @@ open_jfr_in_jmc() {
     return 0
   fi
 
-  ensure_jmc_runtime
+  # ensure_jmc_runtime
 
-  echo "Opening JDK Mission Control..."
-  mkdir -p "$JMC_CACHE_DIR"
-  launch_log="$JMC_CACHE_DIR/jmc-launch.log"
-  : >"$launch_log"
-  env GSETTINGS_BACKEND="${GSETTINGS_BACKEND:-memory}" "$jmc_bin" >"$launch_log" 2>&1 &
-  launch_pid=$!
-  sleep 3
+  # echo "Opening JDK Mission Control..."
+  # mkdir -p "$JMC_CACHE_DIR"
+  # launch_log="$JMC_CACHE_DIR/jmc-launch.log"
+  # : >"$launch_log"
+  # env GSETTINGS_BACKEND="${GSETTINGS_BACKEND:-memory}" "$jmc_bin" >"$launch_log" 2>&1 &
+  # launch_pid=$!
+  # sleep 3
 
-  if ! kill -0 "$launch_pid" >/dev/null 2>&1; then
-    jmc_config_dir="$(dirname "$jmc_bin")/configuration"
-    jmc_error_log="$(find "$jmc_config_dir" -maxdepth 1 -type f -name '*.log' 2>/dev/null | sort | tail -n 1 || true)"
-    echo "JDK Mission Control exited before it was ready." >&2
-    if [[ -s "$launch_log" ]]; then
-      echo "Launcher output:" >&2
-      cat "$launch_log" >&2 || true
-    fi
-    if [[ -n "$jmc_error_log" ]]; then
-      echo "JMC error log: $jmc_error_log" >&2
-    fi
-    echo "Recording file: $recording_file_abs" >&2
-    return 1
-  fi
+  # if ! kill -0 "$launch_pid" >/dev/null 2>&1; then
+  #   jmc_config_dir="$(dirname "$jmc_bin")/configuration"
+  #   jmc_error_log="$(find "$jmc_config_dir" -maxdepth 1 -type f -name '*.log' 2>/dev/null | sort | tail -n 1 || true)"
+  #   echo "JDK Mission Control exited before it was ready." >&2
+  #   if [[ -s "$launch_log" ]]; then
+  #     echo "Launcher output:" >&2
+  #     cat "$launch_log" >&2 || true
+  #   fi
+  #   if [[ -n "$jmc_error_log" ]]; then
+  #     echo "JMC error log: $jmc_error_log" >&2
+  #   fi
+  #   echo "Recording file: $recording_file_abs" >&2
+  #   return 1
+  # fi
 
   echo "Open this recording from JMC: $recording_file_abs"
 }
