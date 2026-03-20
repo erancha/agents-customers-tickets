@@ -23,148 +23,120 @@ class SecurityIntegrationTest {
         @Autowired
         MockMvc mockMvc;
 
+        /**
+         * Expects /api/me to require authentication and return 401 Unauthorized if not authenticated.
+         */
         @Test
         void meRequiresAuthentication() throws Exception {
-                mockMvc.perform(get("/api/me"))
-                                .andExpect(status().isUnauthorized());
+                mockMvc.perform(get("/api/me")).andExpect(status().isUnauthorized());
         }
 
+        /**
+         * Expects /api/auth/token to return 401 Unauthorized when credentials are invalid.
+         */
         @Test
         void invalidCredentialsReturnUnauthorized() throws Exception {
-                mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"admin\",\"password\":\"wrong-password\"}"))
-                                .andExpect(status().isUnauthorized());
+                mockMvc.perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"admin\",\"password\":\"wrong-password\"}")).andExpect(status().isUnauthorized());
         }
 
+        /**
+         * Expects only admin users can create agents; non-admins receive 403 Forbidden.
+         */
         @Test
         void nonAdminCannotCreateAgent() throws Exception {
-                String tokenBody = mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                // Step 1: Authenticate as admin and obtain token
+                String tokenBody = mockMvc
+                                .perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
+                                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
                 String token = tokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*", "$1");
 
-                mockMvc.perform(post("/api/agents")
-                                .header("Authorization", "Bearer " + token)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                                "{\"username\":\"agent1\",\"password\":\"password123\",\"fullName\":\"Agent One\",\"email\":\"agent1@example.com\"}"))
+                // Step 2: Use admin token to create agent1 (should succeed)
+                mockMvc.perform(post("/api/agents").header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"agent1\",\"password\":\"password123\",\"fullName\":\"Agent One\",\"email\":\"agent1@example.com\"}"))
                                 .andExpect(status().isCreated());
 
-                String agentTokenBody = mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"agent1\",\"password\":\"password123\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                // Step 3: Authenticate as agent1 and obtain token
+                String agentTokenBody = mockMvc
+                                .perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"username\":\"agent1\",\"password\":\"password123\"}"))
+                                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-                String agentToken = agentTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*",
-                                "$1");
+                String agentToken = agentTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*", "$1");
 
-                mockMvc.perform(post("/api/agents")
-                                .header("Authorization", "Bearer " + agentToken)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                                "{\"username\":\"agent2\",\"password\":\"password123\",\"fullName\":\"Agent Two\",\"email\":\"agent2@example.com\"}"))
+                // Step 4: Use agent1 token to attempt to create agent2 (should fail with 403 Forbidden)
+                mockMvc.perform(post("/api/agents").header("Authorization", "Bearer " + agentToken).contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"agent2\",\"password\":\"password123\",\"fullName\":\"Agent Two\",\"email\":\"agent2@example.com\"}"))
                                 .andExpect(status().isForbidden());
         }
 
+        /**
+         * Expects a customer can access only their own tickets and cannot filter by agentId to access others' tickets (should receive 403 Forbidden).
+         */
         @Test
         void customerCanAccessOnlyOwnTickets() throws Exception {
                 // Authenticate as admin
-                String adminTokenBody = mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                String adminTokenBody = mockMvc
+                                .perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
+                                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-                String adminToken = adminTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*",
-                                "$1");
+                String adminToken = adminTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*", "$1");
 
                 // Create an agent
-                var agentCreateResponse = mockMvc.perform(post("/api/agents")
-                                .header("Authorization", "Bearer " + adminToken)
+                var agentCreateResponse = mockMvc.perform(post("/api/agents").header("Authorization", "Bearer " + adminToken)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                                "{\"username\":\"agent3\",\"password\":\"password123\",\"fullName\":\"Agent Three\",\"email\":\"agent3@example.com\"}"))
-                                .andExpect(status().isCreated())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                                .content("{\"username\":\"agent3\",\"password\":\"password123\",\"fullName\":\"Agent Three\",\"email\":\"agent3@example.com\"}"))
+                                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
 
                 // Extract agent ID from response
                 String agentId = agentCreateResponse.replaceAll(".*\\\"id\\\"\\s*:\\s*(\\d+).*", "$1");
 
                 // Authenticate as agent
-                String agentTokenBody = mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"agent3\",\"password\":\"password123\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                String agentTokenBody = mockMvc
+                                .perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"username\":\"agent3\",\"password\":\"password123\"}"))
+                                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-                String agentToken = agentTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*",
-                                "$1");
+                String agentToken = agentTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*", "$1");
 
                 // Create a customer under this agent
-                mockMvc.perform(post("/api/customers")
-                                .header("Authorization", "Bearer " + agentToken)
+                mockMvc.perform(post("/api/customers").header("Authorization", "Bearer " + agentToken)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                                "{\"username\":\"customer1\",\"password\":\"password123\",\"fullName\":\"Customer One\",\"email\":\"customer1@example.com\"}"))
+                                .content("{\"username\":\"customer1\",\"password\":\"password123\",\"fullName\":\"Customer One\",\"email\":\"customer1@example.com\"}"))
                                 .andExpect(status().isCreated());
 
                 // Authenticate as customer
-                String customerTokenBody = mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"customer1\",\"password\":\"password123\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                String customerTokenBody = mockMvc
+                                .perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"username\":\"customer1\",\"password\":\"password123\"}"))
+                                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-                String customerToken = customerTokenBody.replaceAll(
-                                ".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*",
-                                "$1");
+                String customerToken = customerTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*", "$1");
 
-                // Customer can access /api/tickets and should see an empty list (no tickets
-                // created)
-                mockMvc.perform(get("/api/tickets")
-                                .header("Authorization", "Bearer " + customerToken))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$").isArray())
-                                .andExpect(jsonPath("$.length()").value(0));
+                // Customer can access /api/tickets and should see an empty list (no tickets created)
+                mockMvc.perform(get("/api/tickets").header("Authorization", "Bearer " + customerToken)).andExpect(status().isOk())
+                                .andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$.length()").value(0));
 
                 // Customer should NOT be able to filter by agentId to access other's tickets
-                mockMvc.perform(get("/api/tickets?agentId=" + agentId)
-                                .header("Authorization", "Bearer " + customerToken))
+                mockMvc.perform(get("/api/tickets?agentId=" + agentId).header("Authorization", "Bearer " + customerToken))
                                 .andExpect(status().isForbidden());
         }
 
+        /**
+         * Expects unknown agent sub-paths (e.g., /api/agents/x) to return 404 Not Found.
+         */
         @Test
         void unknownAgentsSubPathReturnsNotFound() throws Exception {
-                String adminTokenBody = mockMvc.perform(post("/api/auth/token")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
-                                .andExpect(status().isOk())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+                String adminTokenBody = mockMvc
+                                .perform(post("/api/auth/token").contentType(MediaType.APPLICATION_JSON)
+                                                .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
+                                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-                String adminToken = adminTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*",
-                                "$1");
+                String adminToken = adminTokenBody.replaceAll(".*\\\"access_token\\\"\\s*:\\s*\\\"([^\\\"]+)\\\".*", "$1");
 
-                mockMvc.perform(get("/api/agents/x")
-                                .header("Authorization", "Bearer " + adminToken))
-                                .andExpect(status().isNotFound());
+                mockMvc.perform(get("/api/agents/x").header("Authorization", "Bearer " + adminToken)).andExpect(status().isNotFound());
         }
 }

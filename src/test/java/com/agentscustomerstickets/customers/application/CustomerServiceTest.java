@@ -27,26 +27,33 @@ class CustomerServiceTest {
   @InjectMocks
   CustomerService customerService;
 
+  /**
+   * Expects requireCustomer to throw ResourceNotFoundException when the user does not exist (i.e., the user was not created yet).
+   */
   @Test
   void requireCustomerThrowsWhenUserMissing() {
     when(userDirectory.findById(123L)).thenReturn(Optional.empty());
 
-    ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
-        () -> customerService.requireCustomer(123L));
+    ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> customerService.requireCustomer(123L));
     assertEquals("Customer not found", ex.getMessage());
   }
 
+  /**
+   * Expects requireCustomer to throw ResourceNotFoundException when the user exists (i.e., was created) but does not have the CUSTOMER role (e.g., is an agent).
+   */
   @Test
   void requireCustomerThrowsWhenUserIsNotCustomerRole() {
     User user = new User(10L, "agent1", Role.AGENT, null, "Agent One", "a1@example.com");
 
     when(userDirectory.findById(10L)).thenReturn(Optional.of(user));
 
-    ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
-        () -> customerService.requireCustomer(10L));
+    ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> customerService.requireCustomer(10L));
     assertEquals("Customer not found", ex.getMessage());
   }
 
+  /**
+   * Expects requireCustomer to return the user when the user exists and has the CUSTOMER role.
+   */
   @Test
   void requireCustomerReturnsUserWhenRoleIsCustomer() {
     User user = new User(11L, "customer1", Role.CUSTOMER, 1L, "Customer One", "c1@example.com");
