@@ -1,8 +1,10 @@
 package com.agentscustomerstickets.tickets.web;
 
+import com.agentscustomerstickets.users.application.CurrentUserRecordProvider;
 import com.agentscustomerstickets.users.api.CurrentUser;
 import com.agentscustomerstickets.users.api.CurrentUserProvider;
 import com.agentscustomerstickets.users.api.Role;
+import com.agentscustomerstickets.users.api.User;
 import com.agentscustomerstickets.tickets.application.TicketsService;
 import com.agentscustomerstickets.tickets.infra.TicketEntity;
 import jakarta.validation.Valid;
@@ -29,37 +31,36 @@ class TicketsController {
 
   private final CurrentUserProvider currentUserProvider;
   private final TicketsService ticketsService;
+  private final CurrentUserRecordProvider currentUserRecordProvider;
 
-  TicketsController(CurrentUserProvider currentUserProvider, TicketsService ticketsService) {
+  TicketsController(CurrentUserProvider currentUserProvider, TicketsService ticketsService,
+      CurrentUserRecordProvider currentUserRecordProvider) {
     this.currentUserProvider = currentUserProvider;
     this.ticketsService = ticketsService;
+    this.currentUserRecordProvider = currentUserRecordProvider;
   }
 
-  record CreateTicketRequest(
-      @NotBlank @Size(max = 200) String title,
-      @NotBlank @Size(max = 4000) String description) {
+  record CreateTicketRequest(@NotBlank @Size(max = 200) String title, @NotBlank @Size(max = 4000) String description) {
   }
 
-  record TicketResponse(Long id, Long customerId, Long agentId, String title, String description, String status,
-      Instant createdAt) {
+  record TicketResponse(Long id, Long customerId, Long agentId, String title, String description, String status, Instant createdAt) {
     static TicketResponse from(TicketEntity t) {
-      return new TicketResponse(t.getId(), t.getCustomerId(), t.getAgentId(), t.getTitle(), t.getDescription(),
-          t.getStatus(), t.getCreatedAt());
+      return new TicketResponse(t.getId(), t.getCustomerId(), t.getAgentId(), t.getTitle(), t.getDescription(), t.getStatus(),
+          t.getCreatedAt());
     }
   }
 
   @PostMapping
   @PreAuthorize("hasRole('CUSTOMER')")
   ResponseEntity<TicketResponse> create(@Valid @RequestBody CreateTicketRequest req) {
-    CurrentUser cu = currentUserProvider.get();
-    TicketEntity t = ticketsService.createTicket(cu.id(), req.title(), req.description());
+    User customer = currentUserRecordProvider.getCurrentUserRecord();
+    TicketEntity t = ticketsService.createTicket(customer, req.title(), req.description());
     return ResponseEntity.status(HttpStatus.CREATED).body(TicketResponse.from(t));
   }
 
   @GetMapping
   @PreAuthorize("hasAnyRole('CUSTOMER','AGENT','ADMIN')")
-  ResponseEntity<List<TicketResponse>> list(
-      @RequestParam(name = "agentId", required = false) Long agentId,
+  ResponseEntity<List<TicketResponse>> list(@RequestParam(name = "agentId", required = false) Long agentId,
       @RequestParam(name = "customerId", required = false) Long customerId) {
     CurrentUser cu = currentUserProvider.get();
     List<TicketEntity> tickets;

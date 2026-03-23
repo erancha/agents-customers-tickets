@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
-#############################################################################################################
+###########################################################################################################################################
 # Minimal JMeter smoke test runner
-# Usage: ./smoke-test-jmeter.sh [-cu|--compose-up] [-cd|--compose-down] [-rc|--remote-cache] [-l|--long] [jmeter-args]
+# Usage: ./smoke-test-jmeter.sh [-cu|--compose-up] [-cd|--compose-down] [-rc|--remote-cache] [-lc|--local-cache] [-l|--long] [jmeter-args]
 # The number of threads and iterations are set in the .jmx file.
 #
 #   -cd, --compose-down   Run 'docker compose down --volumes' before the test
 #   -cu, --compose-up     Run 'docker compose up -d' before the test
 #   -rc, --remote-cache   Use SPRING_PROFILES_ACTIVE=remote-cache when compose startup is triggered
+#   -lc, --local-cache    Set users.local-jwt-cache.enabled=true when compose startup is triggered (refer to JwtUserRecordCache)
 #   -l, --long            Use the larger predefined JMeter customer and ticket counts
-#############################################################################################################
+###########################################################################################################################################
 
 JMETER_BIN="${JMETER_BIN:-jmeter}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -43,6 +43,7 @@ fi
 compose_up=0
 compose_down=0
 remote_cache=0
+local_cache=0
 long_mode=0
 args=()
 while [[ $# -gt 0 ]]; do
@@ -59,6 +60,10 @@ while [[ $# -gt 0 ]]; do
       remote_cache=1
       shift
       ;;
+    -lc|--local-cache)
+      local_cache=1
+      shift
+      ;;
     -l|--long)
       long_mode=1
       shift
@@ -72,10 +77,14 @@ done
 
 set -- "${args[@]}"
 spring_profiles="docker,test"
+local_cache_enabled="false"
 compose_args=()
 if [[ $remote_cache -eq 1 ]]; then
   spring_profiles="$spring_profiles,remote-cache"
   compose_args=(--profile remote-cache)
+fi
+if [[ $local_cache -eq 1 ]]; then
+  local_cache_enabled="true"
 fi
 
 echo "Running JMeter smoke test: $JMX_FILE"
@@ -88,7 +97,7 @@ fi
 
 if [[ $compose_up -eq 1 || $compose_down -eq 1 ]]; then # to ensure the services are up before the test if either -cu or -cd was passed
   echo "Running 'docker compose up -d' ..."
-  SPRING_PROFILES_ACTIVE="$spring_profiles" docker compose "${compose_args[@]}" up -d || { echo "docker compose up -d failed" >&2; exit 1; }
+  SPRING_PROFILES_ACTIVE="$spring_profiles" USERS_LOCAL_JWT_CACHE_ENABLED="$local_cache_enabled" docker compose "${compose_args[@]}" up -d || { echo "docker compose up -d failed" >&2; exit 1; }
   echo "Waiting 60 seconds for services to start..."
   sleep 60
 fi

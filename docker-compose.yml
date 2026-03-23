@@ -8,6 +8,7 @@ x-shared-integration-env: &shared-integration-env
 
 x-shared-runtime-env: &shared-runtime-env
   SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+  USERS_LOCAL_JWT_CACHE_ENABLED: ${USERS_LOCAL_JWT_CACHE_ENABLED:-false}
 
 x-shared-cdc-env: &shared-cdc-env
   CDC_TOPIC_PARTITIONS: ${CDC_TOPIC_PARTITIONS:-2}

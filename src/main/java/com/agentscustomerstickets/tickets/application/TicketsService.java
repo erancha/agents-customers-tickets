@@ -1,9 +1,7 @@
 package com.agentscustomerstickets.tickets.application;
 
 import com.agentscustomerstickets.users.api.User;
-import com.agentscustomerstickets.users.api.UserDirectory;
 import com.agentscustomerstickets.users.api.Role;
-import com.agentscustomerstickets.shared.error.ResourceNotFoundException;
 import com.agentscustomerstickets.tickets.infra.TicketEntity;
 import com.agentscustomerstickets.tickets.infra.TicketRepository;
 import java.time.Instant;
@@ -17,18 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class TicketsService {
 
   private final TicketRepository ticketRepository;
-  private final UserDirectory userDirectory;
 
-  TicketsService(TicketRepository ticketRepository, UserDirectory userDirectory) {
+  TicketsService(TicketRepository ticketRepository) {
     this.ticketRepository = ticketRepository;
-    this.userDirectory = userDirectory;
   }
 
   @Transactional
-  public TicketEntity createTicket(@NonNull Long customerId, String title, String description) {
-    User customer = userDirectory.findById(customerId)
-        .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-
+  public TicketEntity createTicket(@NonNull User customer, String title, String description) {
     if (customer.role() != Role.CUSTOMER) {
       throw new IllegalArgumentException("Only customers can create tickets");
     }
@@ -38,7 +31,7 @@ public class TicketsService {
     }
 
     TicketEntity t = new TicketEntity();
-    t.setCustomerId(customerId);
+    t.setCustomerId(customer.id());
     t.setAgentId(customer.agentId());
     t.setTitle(title);
     t.setDescription(description);
