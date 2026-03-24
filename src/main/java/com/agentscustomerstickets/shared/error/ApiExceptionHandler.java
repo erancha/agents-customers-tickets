@@ -1,14 +1,17 @@
 package com.agentscustomerstickets.shared.error;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,6 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,16 +47,16 @@ class ApiExceptionHandler {
   @ExceptionHandler({ AuthenticationException.class, InvalidCredentialsException.class })
   ResponseEntity<ApiErrorResponse> handleAuth(Exception ex, HttpServletRequest req) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    log.info("Authentication failed: method={} path={} user={} authorities={} reason={}",
-        req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
+    log.info("Authentication failed: method={} path={} user={} authorities={} reason={}", req.getMethod(), req.getRequestURI(),
+        principalName(auth), authorityNames(auth), ex.getMessage());
     return error(HttpStatus.UNAUTHORIZED, req);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   ResponseEntity<ApiErrorResponse> handleDenied(AccessDeniedException ex, HttpServletRequest req) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    log.info("Authorization denied: method={} path={} user={} authorities={} reason={}",
-        req.getMethod(), req.getRequestURI(), principalName(auth), authorityNames(auth), ex.getMessage());
+    log.info("Authorization denied: method={} path={} user={} authorities={} reason={}", req.getMethod(), req.getRequestURI(),
+        principalName(auth), authorityNames(auth), ex.getMessage());
     return error(HttpStatus.FORBIDDEN, req);
   }
 
@@ -81,8 +85,7 @@ class ApiExceptionHandler {
   }
 
   @ExceptionHandler(TransientDataAccessException.class)
-  ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex,
-      HttpServletRequest req) {
+  ResponseEntity<ApiErrorResponse> handleTransientDataAccessError(TransientDataAccessException ex, HttpServletRequest req) {
     log.warn("Transient database error (may be temporary): {}", ex.getMessage());
     return error(HttpStatus.SERVICE_UNAVAILABLE, req);
   }
@@ -99,9 +102,8 @@ class ApiExceptionHandler {
   }
 
   /**
-   * Checks if an exception is caused by database unavailability by examining the
-   * cause chain.
-   * Looks for SQLException or connection-related exceptions in the stack.
+   * Checks if an exception is caused by database unavailability by examining the cause chain. Looks for SQLException or connection-related
+   * exceptions in the stack.
    */
   private boolean isCausedByDatabaseUnavailability(Throwable ex) {
     Throwable cause = ex;
@@ -111,8 +113,7 @@ class ApiExceptionHandler {
         return true;
       }
       // Check for Spring data access errors wrapping connection issues
-      if (cause instanceof TransientDataAccessException ||
-          cause instanceof DataAccessResourceFailureException) {
+      if (cause instanceof TransientDataAccessException || cause instanceof DataAccessResourceFailureException) {
         return true;
       }
       cause = cause.getCause();
@@ -120,18 +121,53 @@ class ApiExceptionHandler {
     return false;
   }
 
+  @ExceptionHandler(AsyncRequestNotUsableException.class)
+  ResponseEntity<Void> handleAsyncRequestNotUsable(AsyncRequestNotUsableException ex, HttpServletRequest req) {
+    log.debug("Client disconnected before response completed: method={} path={} reason={}", req.getMethod(), req.getRequestURI(),
+        ex.getMessage());
+    return ResponseEntity.noContent().build();
+  }
+
   @ExceptionHandler(Exception.class)
-  ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest req) {
+  ResponseEntity<?> handleGeneric(Exception ex, HttpServletRequest req, HttpServletResponse res) {
+    if (isClientAbort(ex)) {
+      log.debug("Client aborted request: method={} path={} reason={}", req.getMethod(), req.getRequestURI(), ex.getMessage());
+      return ResponseEntity.noContent().build();
+    }
+    if (res.isCommitted() || hasIncompatibleResponseContentType(res)) {
+      log.error(
+          "Unhandled exception after response was committed or negotiated with incompatible content type: method={} path={} contentType={}",
+          req.getMethod(), req.getRequestURI(), res.getContentType(), ex);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
     log.error("Unhandled exception", ex);
     return error(HttpStatus.INTERNAL_SERVER_ERROR, req);
   }
 
   private ResponseEntity<ApiErrorResponse> error(HttpStatus status, HttpServletRequest req) {
-    ApiErrorResponse body = new ApiErrorResponse(
-        Instant.now(),
-        status.value(),
-        status.getReasonPhrase());
+    ApiErrorResponse body = new ApiErrorResponse(Instant.now(), status.value(), status.getReasonPhrase());
     return ResponseEntity.status(status).body(body);
+  }
+
+  private boolean isClientAbort(Throwable ex) {
+    Throwable cause = ex;
+    while (cause != null) {
+      String className = cause.getClass().getName();
+      if ("org.apache.catalina.connector.ClientAbortException".equals(className)) {
+        return true;
+      }
+      String message = cause.getMessage();
+      if (message != null && message.toLowerCase().contains("broken pipe")) {
+        return true;
+      }
+      cause = cause.getCause();
+    }
+    return false;
+  }
+
+  private boolean hasIncompatibleResponseContentType(HttpServletResponse res) {
+    return Optional.ofNullable(res.getContentType()).filter(contentType -> !contentType.isBlank()).map(MediaType::parseMediaType)
+        .filter(mediaType -> !MediaType.APPLICATION_JSON.includes(mediaType)).isPresent();
   }
 
   private static String principalName(Authentication auth) {

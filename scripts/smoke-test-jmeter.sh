@@ -2,15 +2,16 @@
 set -euo pipefail
 
 ###########################################################################################################################################
-# Minimal JMeter smoke test runner
-# Usage: ./smoke-test-jmeter.sh [-cu|--compose-up] [-cd|--compose-down] [-rc|--remote-cache] [-lc|--local-cache] [-l|--long] [jmeter-args]
-# The number of threads and iterations are set in the .jmx file.
-#
+# JMeter smoke test runner
+# Usage: ./smoke-test-jmeter.sh 
 #   -cd, --compose-down   Run 'docker compose down --volumes' before the test
 #   -cu, --compose-up     Run 'docker compose up -d' before the test
 #   -rc, --remote-cache   Use SPRING_PROFILES_ACTIVE=remote-cache when compose startup is triggered
 #   -lc, --local-cache    Set users.local-jwt-cache.enabled=true when compose startup is triggered (refer to JwtUserRecordCache)
+#   -o,  --observability  Enable the compose observability profile and the app observability Spring profile 
 #   -l, --long            Use the larger predefined JMeter customer and ticket counts
+#
+# The number of threads and iterations are set in the .jmx file.
 ###########################################################################################################################################
 
 JMETER_BIN="${JMETER_BIN:-jmeter}"
@@ -44,6 +45,7 @@ compose_up=0
 compose_down=0
 remote_cache=0
 local_cache=0
+observability=0
 long_mode=0
 args=()
 while [[ $# -gt 0 ]]; do
@@ -64,6 +66,10 @@ while [[ $# -gt 0 ]]; do
       local_cache=1
       shift
       ;;
+    -o|--observability)
+      observability=1
+      shift
+      ;;
     -l|--long)
       long_mode=1
       shift
@@ -82,6 +88,10 @@ compose_args=()
 if [[ $remote_cache -eq 1 ]]; then
   spring_profiles="$spring_profiles,remote-cache"
   compose_args=(--profile remote-cache)
+fi
+if [[ $observability -eq 1 ]]; then
+  spring_profiles="$spring_profiles,observability"
+  compose_args+=(--profile observability)
 fi
 if [[ $local_cache -eq 1 ]]; then
   local_cache_enabled="true"

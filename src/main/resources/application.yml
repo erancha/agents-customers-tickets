@@ -48,3 +48,9 @@ websocket:
       client-passcode: ${WS_BROKER_RELAY_CLIENT_PASSCODE:guest}
       system-login: ${WS_BROKER_RELAY_SYSTEM_LOGIN:guest}
       system-passcode: ${WS_BROKER_RELAY_SYSTEM_PASSCODE:guest}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ""

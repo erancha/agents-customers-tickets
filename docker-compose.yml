@@ -64,30 +64,26 @@ x-shared-app-base: &shared-app-base
     <<: *shared-app-env
 
 services:
-  redis:
-    profiles: ["remote-cache"]
-    image: redis:7-alpine
-    mem_limit: ${REDIS_MEM_LIMIT:-64m}
-    command:
-      [
-        "redis-server",
-        "--maxmemory",
-        "8mb",
-        "--maxmemory-policy",
-        "allkeys-lru",
-        "--save", "",
-        "--appendonly", "no"
-      ]
-      # disabled RDB snapshots (--save) and AOF persistence (--appendonly) to ensure Redis operates purely as an in-memory cache.
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+
+  app_lb_1:
+    <<: *shared-app-base
+    environment:
+      <<: *shared-app-env
+      APP_INSTANCE: lb_1
+    networks:
+      default:
+        aliases:
+          - app-lb-1
+
+  app_lb_2:
+    <<: *shared-app-base
+    environment:
+      <<: *shared-app-env
+      APP_INSTANCE: lb_2
+    networks:
+      default:
+        aliases:
+          - app-lb-2
 
   mysql:
     image: mysql:8.4
@@ -115,91 +111,63 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  redpanda:
-    profiles: ["cdc"]
-    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
+  redis:
+    profiles: ["remote-cache"]
+    image: redis:7-alpine
+    mem_limit: ${REDIS_MEM_LIMIT:-64m}
     command:
-      - redpanda
-      - start
-      - --overprovisioned
-      - --smp
-      - "1"
-      - --reserve-memory
-      - 0M
-      - --check=false
-      - --node-id
-      - "0"
-      - --kafka-addr
-      - internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr
-      - internal://redpanda:9092,external://localhost:19092
-      - --pandaproxy-addr
-      - internal://0.0.0.0:8082,external://0.0.0.0:18082
-      - --advertise-pandaproxy-addr
-      - internal://redpanda:8082,external://localhost:18082
-      - --rpc-addr
-      - redpanda:33145
-      - --advertise-rpc-addr
-      - redpanda:33145
-      - --set
-      - redpanda.default_topic_partitions=${CDC_TOPIC_PARTITIONS:-2}
+      [
+        "redis-server",
+        "--maxmemory",
+        "8mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+        "--save", "",
+        "--appendonly", "no"
+      ]
+      # disabled RDB snapshots (--save) and AOF persistence (--appendonly) to ensure Redis operates purely as an in-memory cache.
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     ports:
-      - "19092:19092"
-      - "18082:18082"
-      - "19644:9644"
+      - "6379:6379"
     volumes:
-      - redpanda_data:/var/lib/redpanda/data
+      - redis_data:/data
 
-  redpanda-console:
-    profiles: ["cdc"]
-    image: docker.redpanda.com/redpandadata/console:v2.8.4
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v3.2.1
+    mem_limit: ${PROMETHEUS_MEM_LIMIT:-256m}
     depends_on:
-      - redpanda
-    environment:
-      KAFKA_BROKERS: redpanda:9092
-      REDPANDA_ADMINAPI_ENABLED: "true"
-      REDPANDA_ADMINAPI_URLS: http://redpanda:9644
+      - app_lb_1
+      - app_lb_2
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
     ports:
-      - "8089:8080"
-
-  debezium:
-    profiles: ["cdc"]
-    image: quay.io/debezium/server:3.1
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redpanda:
-        condition: service_started
-    environment:
-      <<: *shared-cdc-env
-      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
+      - "9090:9090"
     volumes:
-      - ./config/debezium/application.properties:/debezium/config/application.properties:ro
-      - debezium_data:/debezium/data
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
 
-  app_lb_1:
-    <<: *shared-app-base
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:11.5.2
+    mem_limit: ${GRAFANA_MEM_LIMIT:-256m}
+    depends_on:
+      - prometheus
     environment:
-      <<: *shared-app-env
-      APP_INSTANCE: lb_1
-
-  app_lb_2:
-    <<: *shared-app-base
-    environment:
-      <<: *shared-app-env
-      APP_INSTANCE: lb_2
-
-  # app_lb_3:
-  #   <<: *shared-app-base
-  #   environment:
-  #     <<: *shared-app-env
-  #     APP_INSTANCE: lb_3
-
-  # app_lb_4:
-  #   <<: *shared-app-base
-  #   environment:
-  #     <<: *shared-app-env
-  #     APP_INSTANCE: lb_4
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana_data:/var/lib/grafana
 
   nginx:
     image: nginx:1.27-alpine
@@ -207,8 +175,6 @@ services:
     depends_on:
       - app_lb_1
       - app_lb_2
-      # - app_lb_3
-      # - app_lb_4
     ports:
       - "${APP_PORT:-8080}:80"
     command:
@@ -219,8 +185,6 @@ services:
         upstream app_upstream {
           server app_lb_1:8080;
           server app_lb_2:8080;
-          # server app_lb_3:8080;
-          # server app_lb_4:8080;
         }
 
         server {
@@ -286,8 +250,72 @@ services:
     ports:
       - "${USERS_SERVICE_PORT:-8081}:8080"
 
+  redpanda:
+    profiles: ["cdc"]
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --reserve-memory
+      - 0M
+      - --check=false
+      - --node-id
+      - "0"
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr
+      - internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr
+      - internal://redpanda:8082,external://localhost:18082
+      - --rpc-addr
+      - redpanda:33145
+      - --advertise-rpc-addr
+      - redpanda:33145
+      - --set
+      - redpanda.default_topic_partitions=${CDC_TOPIC_PARTITIONS:-2}
+    ports:
+      - "19092:19092"
+      - "18082:18082"
+      - "19644:9644"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+
+  redpanda-console:
+    profiles: ["cdc"]
+    image: docker.redpanda.com/redpandadata/console:v2.8.4
+    depends_on:
+      - redpanda
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+      REDPANDA_ADMINAPI_ENABLED: "true"
+      REDPANDA_ADMINAPI_URLS: http://redpanda:9644
+    ports:
+      - "8089:8080"
+
+  debezium:
+    profiles: ["cdc"]
+    image: quay.io/debezium/server:3.1
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+    environment:
+      <<: *shared-cdc-env
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
+    volumes:
+      - ./config/debezium/application.properties:/debezium/config/application.properties:ro
+      - debezium_data:/debezium/data
+
 volumes:
-  redis_data: # Persist Redis data between restarts.
-  mysql_data: # Persist MySQL data between restarts.
-  debezium_data: # Persist Debezium offsets between restarts.
-  redpanda_data: # Persist Redpanda data between restarts.
+  redis_data:
+  mysql_data:
+  debezium_data:
+  redpanda_data:
+  prometheus_data:
+  grafana_data:

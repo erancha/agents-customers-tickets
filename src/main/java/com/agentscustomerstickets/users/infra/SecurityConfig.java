@@ -53,37 +53,24 @@ class SecurityConfig {
   /**
    * Configures stateless API security for the application.
    *
-   * Access rules:
-   * - allow token issuance at {@code POST /api/auth/token}
-   * - allow health/status endpoints ({@code GET /}, {@code GET /health}, {@code /actuator/**})
-   * - require JWT authentication for every other request
-   * The provided converter maps validated JWT claims into the application's
-   * {@link JwtAuthenticationToken} shape.
+   * Access rules: - allow token issuance at {@code POST /api/auth/token} - allow health/status endpoints ({@code GET /},
+   * {@code GET /health}, {@code /actuator/**}) - require JWT authentication for every other request The provided converter maps validated
+   * JWT claims into the application's {@link JwtAuthenticationToken} shape.
    */
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http,
-      Function<Jwt, JwtAuthenticationToken> jwtAuthConverter) throws Exception {
-    http
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(HttpMethod.POST, "/api/auth/token").permitAll()
-            .requestMatchers("/ws/admin-events", "/ws/admin-events/**").permitAll()
-            .requestMatchers("/internal/users/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/", "/health").permitAll()
-            .requestMatchers("/actuator/**").permitAll()
+  SecurityFilterChain securityFilterChain(HttpSecurity http, Function<Jwt, JwtAuthenticationToken> jwtAuthConverter) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable).sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/api/auth/token").permitAll()
+            .requestMatchers("/ws/admin-events", "/ws/admin-events/**").permitAll().requestMatchers("/internal/users/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/", "/health", "/favicon.ico").permitAll().requestMatchers("/actuator/**").permitAll()
             .anyRequest().authenticated()) // require JWT authentication for every other request
-        .oauth2ResourceServer(oauth -> oauth
-            .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtAuthenticationConverter() {
-              {
-                setJwtGrantedAuthoritiesConverter(j -> jwtAuthConverter.apply(j).getAuthorities());
-              }
-            })))
-        .exceptionHandling(ex -> ex
-            .authenticationEntryPoint(authenticationFailedEntryPoint())
-            .accessDeniedHandler(accessDeniedHandler()))
-        .addFilterAfter(securityFlowLoggingFilter(), AuthorizationFilter.class)
-        .httpBasic(Customizer.withDefaults());
+        .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtAuthenticationConverter() {
+          {
+            setJwtGrantedAuthoritiesConverter(j -> jwtAuthConverter.apply(j).getAuthorities());
+          }
+        })))
+        .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationFailedEntryPoint()).accessDeniedHandler(accessDeniedHandler()))
+        .addFilterAfter(securityFlowLoggingFilter(), AuthorizationFilter.class).httpBasic(Customizer.withDefaults());
 
     return http.build();
   }
@@ -91,8 +78,8 @@ class SecurityConfig {
   @Bean
   AuthenticationEntryPoint authenticationFailedEntryPoint() {
     return (request, response, authException) -> {
-      log.info("Authentication failed: method={} path={} reason={}",
-          request.getMethod(), request.getRequestURI(), authException.getMessage());
+      log.info("Authentication failed: method={} path={} reason={}", request.getMethod(), request.getRequestURI(),
+          authException.getMessage());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     };
   }
@@ -102,9 +89,8 @@ class SecurityConfig {
     AccessDeniedHandlerImpl delegate = new AccessDeniedHandlerImpl();
     return (request, response, accessDeniedException) -> {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      log.info("Authorization denied: method={} path={} user={} authorities={} reason={}",
-          request.getMethod(), request.getRequestURI(), principalName(auth), authorityNames(auth),
-          accessDeniedException.getMessage());
+      log.info("Authorization denied: method={} path={} user={} authorities={} reason={}", request.getMethod(), request.getRequestURI(),
+          principalName(auth), authorityNames(auth), accessDeniedException.getMessage());
       delegate.handle(request, response, accessDeniedException);
     };
   }
@@ -116,15 +102,14 @@ class SecurityConfig {
       protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
           @NonNull FilterChain filterChain) throws ServletException, IOException {
         Authentication before = SecurityContextHolder.getContext().getAuthentication();
-        log.debug("Security flow start: method={} path={} user={} authorities={}",
-            request.getMethod(), request.getRequestURI(), principalName(before), authorityNames(before));
+        log.debug("Security flow start: method={} path={} user={} authorities={}", request.getMethod(), request.getRequestURI(),
+            principalName(before), authorityNames(before));
 
         filterChain.doFilter(request, response);
 
         Authentication after = SecurityContextHolder.getContext().getAuthentication();
-        log.debug("Security flow end: method={} path={} status={} user={} authorities={}",
-            request.getMethod(), request.getRequestURI(), response.getStatus(), principalName(after),
-            authorityNames(after));
+        log.debug("Security flow end: method={} path={} status={} user={} authorities={}", request.getMethod(), request.getRequestURI(),
+            response.getStatus(), principalName(after), authorityNames(after));
       }
     };
   }
@@ -132,12 +117,10 @@ class SecurityConfig {
   /**
    * Converts a validated JWT into the authentication shape used by the app.
    *
-   * Expected claims:
-   * - uid: numeric internal user id
-   * - role: enum value from {@link Role} used to build ROLE_* authorities
+   * Expected claims: - uid: numeric internal user id - role: enum value from {@link Role} used to build ROLE_* authorities
    *
-   * The returned token exposes a {@link JwtPrincipal} via {@code getPrincipal()}
-   * so controllers/services can access typed user context instead of raw claims.
+   * The returned token exposes a {@link JwtPrincipal} via {@code getPrincipal()} so controllers/services can access typed user context
+   * instead of raw claims.
    */
   @Bean
   Function<Jwt, JwtAuthenticationToken> jwtAuthConverter() {

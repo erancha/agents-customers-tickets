@@ -1,10 +1,16 @@
 # Agents Customers Tickets
 
-Spring Boot backend service implemented as a modular monolith (clear internal modules, single deployable).
+Spring Boot backend service implemented as a modular monolith (clear internal modules, single deployable), with:
+
+- **Cache**: both [local](src\main\java\com\agentscustomerstickets\users\infra\JwtUserRecordCache.java) in-process cache and [remote](#development) Redis-backed cache.
+- [Observability](#observability): optional Actuator, Prometheus, and Grafana integration.
+- [Admin websocket events](#admin-websocket-events): real-time admin events over STOMP/WebSocket.
+- [CDC](#cdc-mysql-createmodifydelete-to-kafka): MySQL changes streamed to Kafka through Debezium.
+- [Profiling](#profiling): local JFR-based profiling flow with JMeter load.
 
 ## Modular monolith boundaries (phase 1)
 
-Users persistence internals are now encapsulated inside the `users` module:
+Users persistence internals are encapsulated inside the `users` module:
 
 - `UserRepository` and `UsersService` remain in `users.infra` and are not consumed directly by the other modules.
 - The other modules depend on `users.api` contracts for user read/write access:
@@ -70,6 +76,62 @@ docker compose up -d --build --force-recreate
 - Example: `SPRING_PROFILES_ACTIVE=docker,remote-cache docker compose up -d --build --force-recreate`
 
 The application service listens on `http://localhost:8080`.
+
+## Observability
+
+Observability is optional and is enabled through the `observability` Docker Compose profile together with the `observability` Spring profile.
+
+### Deployment
+
+Use the deploy script:
+
+```bash
+./scripts/deploy.sh --observability
+```
+
+Or start the stack directly with Docker Compose:
+
+```bash
+SPRING_PROFILES_ACTIVE=docker,observability docker compose --profile observability up -d --build --force-recreate
+```
+
+When enabled, the application exposes actuator metrics for Prometheus scraping and Docker Compose also starts Prometheus and Grafana.
+
+### Smoke test
+
+```bash
+# To run the JMeter smoke test while bringing up the stack with observability enabled:
+./scripts/smoke-test-jmeter.sh --compose-up --observability
+
+# To reset the stack first and then run the test:
+./scripts/smoke-test-jmeter.sh --compose-down --observability
+```
+
+The `--observability` flag on `scripts/smoke-test-jmeter.sh` matters when the script starts the Docker Compose stack. In that mode it enables both the Docker Compose `observability` profile and the application `observability` Spring profile.
+
+### Access
+
+- Application: `http://localhost:8080`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000/d/http-req-cp-active-connections`
+
+Grafana default credentials:
+
+- Username: `admin`
+- Password: `admin`
+
+unless overridden with `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD`.
+
+### Grafana dashboard
+
+Grafana is provisioned with a dashboard named `HTTP Requests and Connection Pool Active Connections`.
+
+It includes per-replica views for:
+
+- HTTP requests per second
+- Hikari active connections
+
+Prometheus scrapes each app replica directly (`app_lb_1:8080`, `app_lb_2:8080`) instead of going through nginx, so each replica appears as its own dataset in Grafana.
 
 ## Scripts
 

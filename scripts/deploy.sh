@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Flags:
+#   --skip-build     Reuse the existing image/JAR inputs without running build.sh.
+#   --observability  Enable the compose observability profile and the app observability Spring profile.
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
@@ -70,9 +74,43 @@ if [[ ! -f "docker-compose.yml" ]]; then
   fail "docker-compose.yml not found in $ROOT_DIR"
 fi
 
-"$SCRIPT_DIR/build.sh"
+SKIP_BUILD=0
+OBSERVABILITY=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-build)
+      SKIP_BUILD=1
+      shift
+      ;;
+    --observability)
+      OBSERVABILITY=1
+      shift
+      ;;
+    *)
+      fail "Unknown option: $1"
+      ;;
+  esac
+done
+
+COMPOSE_ARGS=(up -d --force-recreate --remove-orphans)
+COMPOSE_PROFILE_ARGS=()
+SPRING_PROFILES_ACTIVE_VALUE="${SPRING_PROFILES_ACTIVE:-docker}"
+
+if [[ "$OBSERVABILITY" == "1" ]]; then
+  COMPOSE_PROFILE_ARGS+=(--profile observability)
+  case ",${SPRING_PROFILES_ACTIVE_VALUE}," in
+    *,observability,*) ;;
+    *) SPRING_PROFILES_ACTIVE_VALUE="${SPRING_PROFILES_ACTIVE_VALUE},observability" ;;
+  esac
+fi
+
+if [[ "$SKIP_BUILD" != "1" ]]; then
+  "$SCRIPT_DIR/build.sh" --clean
+  COMPOSE_ARGS+=(--build)
+fi
 
 APP_PORT="${APP_PORT:-8080}"
-APP_PORT="$APP_PORT" compose up -d --build --force-recreate --remove-orphans
+APP_PORT="$APP_PORT" SPRING_PROFILES_ACTIVE="$SPRING_PROFILES_ACTIVE_VALUE" compose "${COMPOSE_PROFILE_ARGS[@]}" "${COMPOSE_ARGS[@]}"
 
 echo "Deployed via compose: service=$APP_NAME port=${APP_PORT}->8080"
