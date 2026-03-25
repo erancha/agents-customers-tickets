@@ -119,8 +119,7 @@ Grafana default credentials:
 
 - Username: `admin`
 - Password: `admin`
-
-unless overridden with `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD`.
+  unless overridden with `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD`.
 
 ### Grafana dashboard
 
@@ -132,6 +131,10 @@ It includes per-replica views for:
 - Hikari active connections
 
 Prometheus scrapes each app replica directly (`app_lb_1:8080`, `app_lb_2:8080`) instead of going through nginx, so each replica appears as its own dataset in Grafana.
+
+Screen capture of 3 executions of `./scripts/smoke-test-jmeter.sh -l -lc -o`:
+
+[![Observability screen capture](docs/Observability.jpg)](docs/Observability.jpg)
 
 ## Scripts
 
