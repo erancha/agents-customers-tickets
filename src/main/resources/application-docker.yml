@@ -5,6 +5,6 @@ users:
 spring:
   datasource:
     hikari:
-      maximum-pool-size: 150
+      maximum-pool-size: 250
       minimum-idle: 10
       connection-timeout: 30000

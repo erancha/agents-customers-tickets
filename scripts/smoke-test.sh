@@ -116,6 +116,10 @@ pretty_json() {
   fi
 }
 
+seconds_to_ms() {
+  awk -v seconds="$1" 'BEGIN { printf "%.0f", seconds * 1000 }'
+}
+
 uuid() {
   if [[ -r /proc/sys/kernel/random/uuid ]]; then
     cat /proc/sys/kernel/random/uuid
@@ -233,9 +237,12 @@ get_token() {
   local password="$2"
   local http_code
   local body
-  body=$(curl -sS -w "\n%{http_code}" -X POST "$BASE_URL/api/auth/token" -H "Content-Type: application/json" -d "{\"username\":\"$username\",\"password\":\"$password\"}" 2>/dev/null)
-  http_code=$(echo "$body" | tail -n1)
-  body=$(echo "$body" | head -n-1)
+  local elapsed_seconds
+  local elapsed_ms
+  body=$(curl -sS -w "\n%{http_code}\n%{time_total}" -X POST "$BASE_URL/api/auth/token" -H "Content-Type: application/json" -d "{\"username\":\"$username\",\"password\":\"$password\"}" 2>/dev/null)
+  elapsed_seconds=$(echo "$body" | tail -n1)
+  http_code=$(echo "$body" | tail -n2 | head -n1)
+  body=$(echo "$body" | head -n-2)
   
   if [[ "$http_code" != "200" ]]; then
     red "Failed to authenticate (HTTP $http_code)"
@@ -243,6 +250,9 @@ get_token() {
     echo "$body" | pretty_json >&2
     fail "Make sure the service and database are running: docker compose up -d && ./deploy.sh"
   fi
+
+  elapsed_ms=$(seconds_to_ms "$elapsed_seconds")
+  qecho "POST /api/auth/token [$username] elapsed: ${elapsed_ms} ms" >&2
 
   # Extract access_token without jq
   local token
@@ -296,6 +306,30 @@ create_customer_for_agent() {
   echo "$id"
 }
 
+create_ticket() {
+  local token="$1"
+  local body="$2"
+  local customer_label="$3"
+  local ticket_label="$4"
+  local response
+  local http_code
+  local elapsed_seconds
+  local elapsed_ms
+
+  response=$(curl -sS -w "\n%{http_code}\n%{time_total}" -X POST "$BASE_URL/api/tickets" -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "$body")
+  elapsed_seconds=$(echo "$response" | tail -n1)
+  http_code=$(echo "$response" | tail -n2 | head -n1)
+  response=$(echo "$response" | head -n-2)
+
+  if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
+    print_http_error "POST" "$BASE_URL/api/tickets" "$http_code" "$response"
+    return 1
+  fi
+
+  elapsed_ms=$(seconds_to_ms "$elapsed_seconds")
+  qecho "POST /api/tickets [${customer_label} ${ticket_label}] elapsed: ${elapsed_ms} ms" >&2
+  echo "$response" | pretty_json
+}
 
 # Quiet mode helpers (must be global)
 qecho() { if [[ $quiet -eq 0 ]]; then echo "$@"; fi; }
@@ -423,8 +457,8 @@ schedule_runtime_parallelism_snapshot() {
 }
 
 # Customers and tickets count for the main iteration
-customer_count=2
-tickets_per_customer=5
+customer_count=1
+tickets_per_customer=2
 
 main_iteration() {
   created_users=0
@@ -493,7 +527,7 @@ main_iteration() {
       qstep "Creating $tickets_per_customer tickets for customer #${i}..."
       for t in $(seq 1 "$tickets_per_customer"); do
         local ticket_resp
-        ticket_resp=$(json_post "$BASE_URL/api/tickets" "$ctoken" "{\"title\":\"Test ticket c${i} #${t} $(date +%s)\",\"description\":\"Created by smoke-test.sh\"}")
+        ticket_resp=$(create_ticket "$ctoken" "{\"title\":\"Test ticket c${i} #${t} $(date +%s)\",\"description\":\"Created by smoke-test.sh\"}" "customer #${i}" "ticket #${t}")
         ticket_count=$((ticket_count+1))
         if [[ $quiet -eq 0 ]]; then echo "$ticket_resp"; fi
       done
