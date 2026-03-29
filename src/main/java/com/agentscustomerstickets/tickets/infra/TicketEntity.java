@@ -10,10 +10,9 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 @Entity
-@Table(name = "tickets", indexes = {
-    @Index(name = "ix_tickets_customer_id", columnList = "customer_id"),
-    @Index(name = "ix_tickets_agent_id", columnList = "agent_id")
-})
+@Table(name = "tickets", indexes = { @Index(name = "ix_tickets_customer_created_id", columnList = "customer_id, created_at, id"),
+    @Index(name = "ix_tickets_agent_created_id", columnList = "agent_id, created_at, id"),
+    @Index(name = "ix_tickets_agent_customer_created_id", columnList = "agent_id, customer_id, created_at, id") })
 public class TicketEntity {
 
   @Id

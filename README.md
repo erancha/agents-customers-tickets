@@ -132,7 +132,7 @@ It includes per-replica views for:
 
 Prometheus scrapes each app replica directly (`app_lb_1:8080`, `app_lb_2:8080`) instead of going through nginx, so each replica appears as its own dataset in Grafana.
 
-Screen capture of 3 executions of `./scripts/smoke-test-jmeter.sh -l -lc -o`:
+Screen capture of several executions of `./scripts/smoke-test-jmeter.sh -l -lc -o`:
 
 [![Observability screen capture](docs/Observability.jpg)](docs/Observability.jpg)
 

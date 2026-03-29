@@ -125,7 +125,7 @@ fi
 
 # If --long was passed, override NUM_CUSTOMERS and TICKETS_PER_CUSTOMER
 if [[ $long_mode -eq 1 ]]; then
-  set -- -JNUM_CUSTOMERS=500 -JTICKETS_PER_CUSTOMER=2000 "$@"
+  set -- -JNUM_CUSTOMERS=500 -JTICKETS_PER_CUSTOMER=10000 "$@"
 fi
 
 "$JMETER_BIN" -n -t "$JMX_FILE" -l "$RESULTS_FILE" -j "$JMETER_LOG_FILE" \
