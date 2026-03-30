@@ -17,7 +17,6 @@ set -euo pipefail
 JMETER_BIN="${JMETER_BIN:-jmeter}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 JMX_FILE="$SCRIPT_DIR/smoke-test-jmeter.jmx"
-RESULTS_FILE="${RESULTS_FILE:-$SCRIPT_DIR/smoke-test-jmeter.jtl}"
 JMETER_LOG_FILE="${JMETER_LOG_FILE:-$SCRIPT_DIR/smoke-test-jmeter.log}"
 LOG4J2_CONFIG_FILE="${LOG4J2_CONFIG_FILE:-$SCRIPT_DIR/log4j2-jmeter.xml}"
 
@@ -128,8 +127,7 @@ if [[ $long_mode -eq 1 ]]; then
   set -- -JNUM_CUSTOMERS=500 -JTICKETS_PER_CUSTOMER=10000 "$@"
 fi
 
-"$JMETER_BIN" -n -t "$JMX_FILE" -l "$RESULTS_FILE" -j "$JMETER_LOG_FILE" \
+"$JMETER_BIN" -n -t "$JMX_FILE" -j "$JMETER_LOG_FILE" \
   "$@"
 
-echo "Results: $RESULTS_FILE"
 echo "Log: $JMETER_LOG_FILE"
